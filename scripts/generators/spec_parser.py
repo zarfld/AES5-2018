@@ -134,8 +134,14 @@ def main() -> int:
                 print(f"WARN: failed to parse {path}: {e}", file=sys.stderr)
 
     # Parse test source files for TEST-* identifiers and requirement references.
-    test_id_pattern = re.compile(r'\b(TEST-[A-Z0-9\-]+)\b')
+    # Pattern to match @test TEST-ID: ... followed by @requirements REQ-*
+    test_block_pattern = re.compile(
+        r'@test\s+(TEST-[A-Z0-9\-]+):.*?(?:@requirements?\s+((?:REQ-[A-Z0-9\-]+(?:\s*,\s*)?)+))?',
+        re.IGNORECASE | re.DOTALL
+    )
+    test_id_fallback = re.compile(r'\b(TEST-[A-Z0-9\-]+)\b')
     req_ref_pattern = re.compile(r'\b(REQ-[A-Z0-9\-]+)\b')
+    
     for tdir in CODE_TEST_DIRS:
         if not tdir.exists():
             continue
@@ -146,18 +152,35 @@ def main() -> int:
                 except Exception as e:
                     print(f"WARN: failed to read test file {src}: {e}", file=sys.stderr)
                     continue
-                test_ids = sorted(set(test_id_pattern.findall(text)))
-                if not test_ids:
-                    continue
-                req_refs = sorted({r for r in req_ref_pattern.findall(text)})
-                for tid in test_ids:
+                
+                # Try structured parsing first (looking for @test ... @requirements blocks)
+                matched_tests = set()
+                for match in test_block_pattern.finditer(text):
+                    test_id = match.group(1)
+                    req_block = match.group(2) if match.lastindex >= 2 else ""
+                    req_refs = sorted(set(req_ref_pattern.findall(req_block))) if req_block else []
+                    matched_tests.add(test_id)
                     all_items.append({
-                        'id': tid,
+                        'id': test_id,
                         'title': src.stem,
                         'path': str(src.relative_to(ROOT)),
                         'references': req_refs,
-                        'hash': hashlib.sha1((tid+text).encode('utf-8')).hexdigest()[:8],
+                        'hash': hashlib.sha1((test_id+text).encode('utf-8')).hexdigest()[:8],
                     })
+                
+                # Fallback: if no structured tests found, use old behavior (all REQs to all TESTs)
+                if not matched_tests:
+                    test_ids = sorted(set(test_id_fallback.findall(text)))
+                    if test_ids:
+                        req_refs = sorted({r for r in req_ref_pattern.findall(text)})
+                        for tid in test_ids:
+                            all_items.append({
+                                'id': tid,
+                                'title': src.stem,
+                                'path': str(src.relative_to(ROOT)),
+                                'references': req_refs,
+                                'hash': hashlib.sha1((tid+text).encode('utf-8')).hexdigest()[:8],
+                            })
     # De-duplicate by ID keeping first occurrence while tracking duplicates
     seen = {}
     dedup: List[Dict[str, Any]] = []

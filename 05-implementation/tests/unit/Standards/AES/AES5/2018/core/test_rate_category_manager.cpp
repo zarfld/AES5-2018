@@ -373,18 +373,23 @@ TEST_F(RateCategoryManagerTest, ThreadSafetyValidation) {
     constexpr size_t classifications_per_thread = 100;
     
     std::vector<std::thread> threads;
-    std::vector<uint32_t> test_frequencies = {32000, 44100, 48000, 96000};
+    
+    // Use unique frequencies to avoid cache hits (cache skips metrics increment)
+    // Generate frequencies: 31000 + (thread_id * 1000) + iteration
+    // This ensures each call increments the metrics counter
     
     // When: Multiple threads perform concurrent classifications
     for (size_t t = 0; t < num_threads; ++t) {
-        threads.emplace_back([&, t]() {
+        threads.emplace_back([this, t, classifications_per_thread]() {
             for (size_t i = 0; i < classifications_per_thread; ++i) {
-                uint32_t freq = test_frequencies[i % test_frequencies.size()];
+                // Generate unique frequency for this thread+iteration
+                // Range: 31000-35400 Hz (valid basic rate category range)
+                uint32_t freq = 31000 + (t * 1000) + (i * 10);
                 auto result = rate_manager_->classify_rate_category(freq);
                 
-                // Verify result consistency
-                EXPECT_TRUE(result.is_valid());
-                EXPECT_NE(result.category, RateCategory::Unknown);
+                // Verify result consistency (all should be Basic rate)
+                EXPECT_TRUE(result.valid);
+                EXPECT_EQ(result.category, RateCategory::Basic);
             }
         });
     }
@@ -394,22 +399,15 @@ TEST_F(RateCategoryManagerTest, ThreadSafetyValidation) {
         thread.join();
     }
     
-    // Then: Metrics should reflect all operations (allow small margin for race conditions)
+    // Then: Metrics should reflect all operations
+    // With unique frequencies, cache is bypassed and all operations increment counter
     const auto& metrics = rate_manager_->get_metrics();
     size_t expected_count = num_threads * classifications_per_thread;
     size_t actual_count = metrics.total_validations.load();
     
-    // Allow up to 2% margin for potential timing/scheduling races
-    double margin_ratio = 0.98;
-    size_t min_expected = static_cast<size_t>(expected_count * margin_ratio);
-    
-    EXPECT_GE(actual_count, min_expected)
-        << "Expected at least " << min_expected << " validations (98% of " 
-        << expected_count << "), but got " << actual_count;
-    
-    EXPECT_LE(actual_count, expected_count)
-        << "Got more validations (" << actual_count 
-        << ") than expected (" << expected_count << ")";
+    EXPECT_EQ(actual_count, expected_count)
+        << "Expected " << expected_count << " validations (all unique frequencies), "
+        << "but got " << actual_count;
 }
 
 /**
