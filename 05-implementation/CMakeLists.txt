@@ -158,6 +158,18 @@ target_link_libraries(rate_category_manager_tests PRIVATE
     gtest_main
 )
 
+# Unit Tests - AES5-2018 Conformity Tests (Quality Requirements)
+add_executable(aes5_2018_conformity_tests
+    tests/unit/Standards/AES/AES5/2018/conformity/test_aes5_2018_conformity.cpp
+)
+
+target_link_libraries(aes5_2018_conformity_tests PRIVATE
+    aes5_standards
+    aes5_test_framework
+    gtest
+    gtest_main
+)
+
 # Register ComplianceEngine tests with CTest
 add_test(NAME ComplianceEngineUnitTests COMMAND compliance_engine_tests)
 
@@ -169,6 +181,9 @@ add_test(NAME FrequencyValidatorUnitTests COMMAND frequency_validator_tests)
 
 # Register RateCategoryManager tests with CTest
 add_test(NAME RateCategoryManagerUnitTests COMMAND rate_category_manager_tests)
+
+# Register AES5-2018 Conformity tests with CTest
+add_test(NAME AES5_2018_ConformityTests COMMAND aes5_2018_conformity_tests)
 
 # Performance Benchmarks
 add_executable(frequency_validator_benchmark
@@ -219,13 +234,18 @@ set_tests_properties(RateCategoryManagerUnitTests PROPERTIES
     ENVIRONMENT "GTEST_COLOR=1"
 )
 
+set_tests_properties(AES5_2018_ConformityTests PROPERTIES
+    TIMEOUT 60
+    ENVIRONMENT "GTEST_COLOR=1"
+)
+
 # Custom targets for TDD workflow
 
 # Target: Run all tests
 add_custom_target(run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --verbose
-    DEPENDS compliance_engine_tests validation_core_tests frequency_validator_tests
-    COMMENT "Running all TDD tests"
+    DEPENDS compliance_engine_tests validation_core_tests frequency_validator_tests rate_category_manager_tests aes5_2018_conformity_tests
+    COMMENT "Running all TDD tests including conformity tests"
 )
 
 # Target: Check test coverage (if gcovr is available)
