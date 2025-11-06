@@ -176,18 +176,33 @@ TEST_F(RateCategoryManagerTest, ClassifyQuadrupleRateCategory) {
  * @traceability TEST-C-003-005 → DES-C-003 → AES5-OCTUPLE-RATE
  */
 TEST_F(RateCategoryManagerTest, ClassifyOctupleRateCategory) {
-    // Test cases for octuple rate category
-    std::vector<uint32_t> valid_frequencies = {352800, 384000, 248000, 432000};
+    // Test cases for octuple rate category with precise audio engineering calculations
+    struct TestCase {
+        uint32_t frequency;
+        double expected_multiplier;
+    };
     
-    for (uint32_t frequency : valid_frequencies) {
+    std::vector<TestCase> test_cases = {
+        {352800, 7.35},    // 352.8 kHz / 48 kHz = 7.35 (8×44.1k)
+        {384000, 8.0},     // 384 kHz / 48 kHz = 8.0 (8×48k)
+        {248000, 5.167},   // 248 kHz / 48 kHz ≈ 5.17 (minimum octuple)
+        {432000, 9.0}      // 432 kHz / 48 kHz = 9.0 (maximum octuple)
+    };
+    
+    for (const auto& test_case : test_cases) {
         // When: Classifying valid octuple rate frequency
-        auto result = rate_manager_->classify_rate_category(frequency);
+        auto result = rate_manager_->classify_rate_category(test_case.frequency);
         
         // Then: Should return octuple rate category
         EXPECT_EQ(result.category, RateCategory::Octuple) 
-            << "Frequency: " << frequency << " Hz";
+            << "Frequency: " << test_case.frequency << " Hz";
         EXPECT_TRUE(result.is_valid());
-        EXPECT_GT(result.multiplier, 7.5) << "Should be ~8x multiplier";
+        
+        // Validate accurate audio engineering multiplier calculation
+        EXPECT_NEAR(result.multiplier, test_case.expected_multiplier, 0.01) 
+            << "Frequency: " << test_case.frequency 
+            << " Hz, Expected: " << test_case.expected_multiplier 
+            << ", Actual: " << result.multiplier;
     }
 }
 

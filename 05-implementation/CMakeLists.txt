@@ -184,6 +184,20 @@ target_include_directories(frequency_validator_benchmark PRIVATE
     ${STANDARDS_INCLUDE_DIR}
 )
 
+# RateCategoryManager Performance Benchmark
+add_executable(rate_category_manager_benchmark
+    benchmark/rate_category_manager_benchmark.cpp
+)
+
+target_link_libraries(rate_category_manager_benchmark PRIVATE
+    aes5_standards
+)
+
+target_include_directories(rate_category_manager_benchmark PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${STANDARDS_INCLUDE_DIR}
+)
+
 # Set test properties for better output
 set_tests_properties(ComplianceEngineUnitTests PROPERTIES
     TIMEOUT 30

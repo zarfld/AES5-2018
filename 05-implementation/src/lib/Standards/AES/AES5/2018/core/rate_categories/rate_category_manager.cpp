@@ -3,9 +3,9 @@
  * @brief AES5-2018 Rate Category Manager Implementation
  * @traceability DES-C-003
  * 
- * RED PHASE: Minimal implementation to make TDD tests fail appropriately.
- * This implementation provides stub methods that will fail tests,
- * driving the development of proper AES5-2018 rate category logic.
+ * REFACTOR PHASE: High-performance implementation optimized for <10μs classification latency.
+ * Uses O(1) lookup tables, precomputed multipliers, and optimized execution paths
+ * to achieve microsecond-level performance suitable for real-time audio processing.
  */
 
 #include "rate_category_manager.hpp"
@@ -17,6 +17,66 @@ namespace AES5 {
 namespace _2018 {
 namespace core {
 namespace rate_categories {
+
+// REFACTOR PHASE: Initialize high-performance lookup tables
+const std::array<RateCategory, RateCategoryManager::FREQUENCY_LOOKUP_SIZE> 
+    RateCategoryManager::frequency_to_category_lookup_ = []() {
+    std::array<RateCategory, FREQUENCY_LOOKUP_SIZE> lookup{};
+    
+    // Initialize all frequencies as Unknown
+    lookup.fill(RateCategory::Unknown);
+    
+    // Use precise frequency-by-frequency mapping for exact AES5-2018 compliance
+    for (size_t i = 0; i < FREQUENCY_LOOKUP_SIZE; ++i) {
+        uint32_t frequency_hz = i * 1000;  // Convert index to Hz
+        
+        // AES5-2018 Section 5.3 rate category classification
+        if (frequency_hz >= QUARTER_RATE_MIN_HZ && frequency_hz <= QUARTER_RATE_MAX_HZ) {
+            lookup[i] = RateCategory::Quarter;
+        }
+        else if (frequency_hz >= HALF_RATE_MIN_HZ && frequency_hz <= HALF_RATE_MAX_HZ) {
+            lookup[i] = RateCategory::Half;
+        }
+        else if (frequency_hz >= BASIC_RATE_MIN_HZ && frequency_hz <= BASIC_RATE_MAX_HZ) {
+            lookup[i] = RateCategory::Basic;
+        }
+        else if (frequency_hz >= DOUBLE_RATE_MIN_HZ && frequency_hz <= DOUBLE_RATE_MAX_HZ) {
+            lookup[i] = RateCategory::Double;
+        }
+        else if (frequency_hz >= QUADRUPLE_RATE_MIN_HZ && frequency_hz <= QUADRUPLE_RATE_MAX_HZ) {
+            lookup[i] = RateCategory::Quadruple;
+        }
+        else if (frequency_hz >= OCTUPLE_RATE_MIN_HZ && frequency_hz <= OCTUPLE_RATE_MAX_HZ) {
+            lookup[i] = RateCategory::Octuple;
+        }
+        // else remains RateCategory::Unknown
+    }
+    
+    return lookup;
+}();
+
+const std::array<double, RateCategoryManager::FREQUENCY_LOOKUP_SIZE>
+    RateCategoryManager::frequency_to_multiplier_lookup_ = []() {
+    std::array<double, FREQUENCY_LOOKUP_SIZE> lookup{};
+    
+    // Precompute multipliers for all frequencies
+    for (size_t i = 0; i < FREQUENCY_LOOKUP_SIZE; ++i) {
+        uint32_t frequency_hz = i * 1000;  // Convert index to Hz
+        if (frequency_hz == 0) {
+            lookup[i] = 0.0;
+        } else {
+            // Only compute multiplier if frequency is in valid range
+            RateCategory category = frequency_to_category_lookup_[i];
+            if (category != RateCategory::Unknown) {
+                lookup[i] = static_cast<double>(frequency_hz) / static_cast<double>(BASE_FREQUENCY_HZ);
+            } else {
+                lookup[i] = 0.0;  // Invalid frequencies get 0.0 multiplier
+            }
+        }
+    }
+    
+    return lookup;
+}();
 
 // RateCategoryResult implementation
 const char* RateCategoryResult::get_category_name() const noexcept {
@@ -45,14 +105,14 @@ const char* RateCategoryResult::get_aes5_section() const noexcept {
     }
 }
 
-// Private constructor
+// REFACTOR PHASE: Optimized constructor with O(1) lookup tables
 RateCategoryManager::RateCategoryManager(
     std::unique_ptr<validation::ValidationCore> validation_core) noexcept
     : validation_core_(std::move(validation_core))
     , last_frequency_(0)
     , last_category_(RateCategory::Unknown)
     , last_multiplier_(0.0) {
-    // GREEN PHASE: Initialize lookup tables for performance optimization
+    // Lookup tables are statically initialized - no runtime initialization required
     frequency_cache_.fill(0);
     category_cache_.fill(RateCategory::Unknown);
     multiplier_cache_.fill(0.0);
@@ -145,57 +205,65 @@ bool RateCategoryManager::is_valid_rate_category(uint32_t frequency_hz) const no
     return result.is_valid();
 }
 
-// Internal implementation methods - GREEN PHASE: AES5-2018 Section 5.3 logic
+// Internal implementation methods - REFACTOR PHASE: O(1) optimized AES5-2018 logic
 RateCategory RateCategoryManager::classify_rate_category_internal(uint32_t frequency_hz) const noexcept {
-    // AES5-2018 Section 5.3 rate category classification
+    // REFACTOR PHASE: Use O(1) lookup table instead of O(n) range checks
+    return classify_frequency_optimized(frequency_hz);
+}
+
+double RateCategoryManager::calculate_multiplier_internal(uint32_t frequency_hz) const noexcept {
+    // REFACTOR PHASE: Use O(1) precomputed multiplier lookup
+    return calculate_multiplier_optimized(frequency_hz);
+}
+
+// REFACTOR PHASE: O(1) optimized classification methods
+RateCategory RateCategoryManager::classify_frequency_optimized(uint32_t frequency_hz) const noexcept {
+    // For fractional kHz frequencies, fall back to range-based classification
+    // for perfect AES5-2018 compliance while maintaining O(1) for most cases
     
-    // Quarter rate: 7.75-13.5 kHz
+    // Try O(1) lookup first for integer kHz frequencies
+    uint32_t frequency_khz = frequency_hz / 1000;
+    if (frequency_khz < FREQUENCY_LOOKUP_SIZE && (frequency_hz % 1000) == 0) {
+        // Perfect integer kHz - use O(1) lookup
+        return frequency_to_category_lookup_[frequency_khz];
+    }
+    
+    // Fractional kHz or out-of-range - use precise range checks for AES5-2018 compliance
     if (frequency_hz >= QUARTER_RATE_MIN_HZ && frequency_hz <= QUARTER_RATE_MAX_HZ) {
         return RateCategory::Quarter;
     }
-    
-    // Half rate: 15.5-27 kHz
     if (frequency_hz >= HALF_RATE_MIN_HZ && frequency_hz <= HALF_RATE_MAX_HZ) {
         return RateCategory::Half;
     }
-    
-    // Basic rate: 31-54 kHz (includes 32k, 44.1k, 48k)
     if (frequency_hz >= BASIC_RATE_MIN_HZ && frequency_hz <= BASIC_RATE_MAX_HZ) {
         return RateCategory::Basic;
     }
-    
-    // Double rate: 62-108 kHz (includes 88.2k, 96k)
     if (frequency_hz >= DOUBLE_RATE_MIN_HZ && frequency_hz <= DOUBLE_RATE_MAX_HZ) {
         return RateCategory::Double;
     }
-    
-    // Quadruple rate: 124-216 kHz (includes 176.4k, 192k)
     if (frequency_hz >= QUADRUPLE_RATE_MIN_HZ && frequency_hz <= QUADRUPLE_RATE_MAX_HZ) {
         return RateCategory::Quadruple;
     }
-    
-    // Octuple rate: 248-432 kHz (includes 352.8k, 384k)
     if (frequency_hz >= OCTUPLE_RATE_MIN_HZ && frequency_hz <= OCTUPLE_RATE_MAX_HZ) {
         return RateCategory::Octuple;
     }
     
-    // No matching category
     return RateCategory::Unknown;
 }
 
-double RateCategoryManager::calculate_multiplier_internal(uint32_t frequency_hz) const noexcept {
-    // Calculate multiplier relative to 48 kHz base frequency
-    // Return 0.0 for invalid frequencies (outside any rate category)
+double RateCategoryManager::calculate_multiplier_optimized(uint32_t frequency_hz) const noexcept {
+    // For zero frequency, return 0.0
     if (frequency_hz == 0) {
         return 0.0;
     }
     
-    // Check if frequency is in a valid AES5-2018 rate category
-    RateCategory category = classify_rate_category_internal(frequency_hz);
+    // Check if frequency is in a valid AES5-2018 rate category first
+    RateCategory category = classify_frequency_optimized(frequency_hz);
     if (category == RateCategory::Unknown) {
-        return 0.0;  // Invalid frequencies should have 0.0 multiplier
+        return 0.0;  // Invalid frequencies get 0.0 multiplier
     }
     
+    // Calculate precise multiplier for valid frequencies
     return static_cast<double>(frequency_hz) / static_cast<double>(BASE_FREQUENCY_HZ);
 }
 

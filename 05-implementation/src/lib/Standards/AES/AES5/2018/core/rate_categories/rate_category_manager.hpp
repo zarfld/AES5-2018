@@ -227,6 +227,15 @@ private:
     mutable std::array<RateCategory, LOOKUP_TABLE_SIZE> category_cache_;
     mutable std::array<double, LOOKUP_TABLE_SIZE> multiplier_cache_;
     mutable std::atomic<size_t> cache_index_{0};  ///< Current cache index
+    
+    // REFACTOR PHASE: High-performance O(1) lookup tables
+    static constexpr size_t FREQUENCY_LOOKUP_SIZE = 512;  ///< 0-511 kHz range
+    static const std::array<RateCategory, FREQUENCY_LOOKUP_SIZE> frequency_to_category_lookup_;
+    static const std::array<double, FREQUENCY_LOOKUP_SIZE> frequency_to_multiplier_lookup_;
+    
+    // Performance optimization methods
+    RateCategory classify_frequency_optimized(uint32_t frequency_hz) const noexcept;
+    double calculate_multiplier_optimized(uint32_t frequency_hz) const noexcept;
 };
 
 /**
