@@ -335,9 +335,11 @@ TEST_F(FrequencyValidatorTest, ToleranceCalculationPrecision) {
  * @traceability TEST-C-001-011 → DES-C-001 → SYS-PERF-001
  */
 TEST_F(FrequencyValidatorTest, PerformanceMetricsIntegration) {
-    // Given: Initial metrics state
-    const ValidationMetrics& initial_metrics = validator_->get_metrics();
-    uint64_t initial_validations = initial_metrics.total_validations.load(std::memory_order_relaxed);
+    // Given: Initial metrics state (store values, not references)
+    const ValidationMetrics& initial_metrics_ref = validator_->get_metrics();
+    uint64_t initial_validations = initial_metrics_ref.total_validations.load(std::memory_order_relaxed);
+    uint64_t initial_successful = initial_metrics_ref.successful_validations.load(std::memory_order_relaxed);
+    uint64_t initial_failed = initial_metrics_ref.failed_validations.load(std::memory_order_relaxed);
     
     // When: Performing multiple validations
     validator_->validate_frequency(48000);
@@ -347,12 +349,12 @@ TEST_F(FrequencyValidatorTest, PerformanceMetricsIntegration) {
     // Then: Metrics should be updated
     const ValidationMetrics& final_metrics = validator_->get_metrics();
     uint64_t final_validations = final_metrics.total_validations.load(std::memory_order_relaxed);
+    uint64_t final_successful = final_metrics.successful_validations.load(std::memory_order_relaxed);
+    uint64_t final_failed = final_metrics.failed_validations.load(std::memory_order_relaxed);
     
     EXPECT_EQ(final_validations, initial_validations + 3);
-    EXPECT_GT(final_metrics.successful_validations.load(std::memory_order_relaxed), 
-              initial_metrics.successful_validations.load(std::memory_order_relaxed));
-    EXPECT_GT(final_metrics.failed_validations.load(std::memory_order_relaxed), 
-              initial_metrics.failed_validations.load(std::memory_order_relaxed));
+    EXPECT_GT(final_successful, initial_successful);
+    EXPECT_GT(final_failed, initial_failed);
     
     // And: Should meet real-time constraints
     EXPECT_TRUE(validator_->meets_realtime_constraints());
@@ -363,6 +365,8 @@ TEST_F(FrequencyValidatorTest, PerformanceMetricsIntegration) {
     // Then: Metrics should be reset to zero
     const ValidationMetrics& reset_metrics = validator_->get_metrics();
     EXPECT_EQ(reset_metrics.total_validations.load(std::memory_order_relaxed), 0);
+    EXPECT_EQ(reset_metrics.successful_validations.load(std::memory_order_relaxed), 0);
+    EXPECT_EQ(reset_metrics.failed_validations.load(std::memory_order_relaxed), 0);
     EXPECT_EQ(reset_metrics.successful_validations.load(std::memory_order_relaxed), 0);
     EXPECT_EQ(reset_metrics.failed_validations.load(std::memory_order_relaxed), 0);
 }
