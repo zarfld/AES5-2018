@@ -29,10 +29,10 @@ ROOT = Path(__file__).resolve().parents[2]
 BUILD_DIR = ROOT / 'build'
 OUTPUT_FILE = BUILD_DIR / 'spec-index.json'
 
-ID_PATTERN = re.compile(r'^(?P<id>(StR|REQ|ARC|ADR|QA|TEST)-(?:[A-Z]{4}-)?[A-Z0-9][A-Z0-9\-]*)\b')
-# Capture full identifiers with optional 4-char category prefix
-# Examples: REQ-AUTH-F-001, StR-CORE-001, ADR-INFRA-001, TEST-LOGIN-001
-REF_PATTERN = re.compile(r'\b(?:StR|REQ|ARC|ADR|QA|TEST)-(?:[A-Z]{4}-)?[A-Z0-9][A-Z0-9\-]*\b')
+ID_PATTERN = re.compile(r'^(?P<id>(StR|REQ|ARC|ADR|QA|TEST)-(?:[A-Z]{2,4}-)?[A-Z0-9][A-Z0-9\-]*)\b')
+# Capture full identifiers with optional 2-4 char category prefix
+# Examples: REQ-AUTH-F-001, StR-CORE-001, ADR-INFRA-001, QA-SC-001, TEST-LOGIN-001
+REF_PATTERN = re.compile(r'\b(?:StR|REQ|ARC|ADR|QA|TEST)-(?:[A-Z]{2,4}-)?[A-Z0-9][A-Z0-9\-]*\b')
 
 SCAN_DIRS = [
     ROOT / '02-requirements',
