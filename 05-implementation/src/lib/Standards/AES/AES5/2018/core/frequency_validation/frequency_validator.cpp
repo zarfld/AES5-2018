@@ -200,6 +200,14 @@ bool FrequencyValidator::meets_realtime_constraints(uint64_t max_latency_ns) con
     return validation_core_->meets_realtime_constraints(max_latency_ns);
 }
 
+// Main frequency validation with tolerance checking
+FrequencyValidationResult FrequencyValidator::validate_frequency(
+    uint32_t frequency, uint32_t tolerance_ppm) const noexcept {
+    
+    // Delegate to internal implementation
+    return validate_frequency_internal(frequency, tolerance_ppm);
+}
+
 // Initialize tolerance tables
 void FrequencyValidator::initialize_tolerance_tables() noexcept {
     // GREEN PHASE: Initialize basic tolerance table
