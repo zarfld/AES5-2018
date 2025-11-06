@@ -36,14 +36,16 @@ priority: "high"
 
 **Q1.1**: What constitutes "real-time" performance for different application contexts?
 
-- [ ] **Hard real-time**: Guaranteed deadlines with system failure if exceeded
+**STAKEHOLDER RESPONSE**: Hard real-time required with <5ms end-to-end latency guarantee
+
+- [x] **Hard real-time**: Guaranteed deadlines with system failure if exceeded
 - [ ] **Soft real-time**: Best-effort with occasional deadline misses acceptable  
 - [ ] **Near real-time**: Consistent performance with bounded worst-case behavior
-- [ ] **Context-dependent**: Different real-time requirements per use case
-  - [ ] Live performance/monitoring: Hard real-time required
+- [x] **Context-dependent**: Different real-time requirements per use case
+  - [x] Live performance/monitoring: Hard real-time required (<5ms target)
   - [ ] Studio processing: Soft real-time acceptable
   - [ ] File processing: Near real-time sufficient
-- [ ] Other real-time definitions: ________________
+- [x] **Specific Target**: <5ms end-to-end latency on both embedded and desktop platforms
 
 **Q1.2**: How should the system handle varying sampling frequencies' performance impact?
 
@@ -84,17 +86,20 @@ priority: "high"
 
 **Q2.2**: What are the CPU utilization limits across platforms?
 
+**STAKEHOLDER RESPONSE**: Must support resource-constrained embedded targets (Arduino Uno level)
+
 **Desktop Systems:**
-- [ ] **Maximum sustained CPU**: _____ % (suggested: 50-70%)
-- [ ] **Peak CPU during initialization**: _____ % (suggested: 90%)
+- [x] **Maximum sustained CPU**: 50% (allowing headroom for other applications)
+- [x] **Peak CPU during initialization**: 90% (brief initialization acceptable)
 - [ ] **CPU per audio channel**: _____ % per channel
-- [ ] **Cores utilization**: Single-core / Multi-core / User-configurable
+- [x] **Cores utilization**: Multi-core preferred for scalability
 
 **Embedded Systems:**
-- [ ] **Maximum sustained CPU**: _____ % (suggested: 30-50%)
-- [ ] **Real-time constraints**: Priority level and scheduling requirements
-- [ ] **Power consumption limits**: _____ watts maximum
-- [ ] Other embedded limits: ________________
+- [x] **Maximum sustained CPU**: 30% (severe resource constraints - Arduino Uno level)
+- [x] **Real-time constraints**: Hard real-time priority with deterministic scheduling
+- [x] **Memory constraint**: <32KB RAM total (including audio buffers)
+- [x] **No FPU requirement**: Must work on integer-only processors (Arduino Uno)
+- [x] **Power consumption**: Minimize for battery-powered applications
 
 **Q2.3**: What are the memory usage constraints?
 
@@ -160,12 +165,15 @@ priority: "high"
 
 **Q4.2**: What are the startup and initialization performance requirements?
 
-- [ ] **Library initialization**: Complete within _____ ms
-- [ ] **First audio output**: Ready within _____ ms of initialization
-- [ ] **Configuration changes**: Apply new settings within _____ ms
-- [ ] **Frequency switching**: Change sampling frequency within _____ ms
-- [ ] **Resource allocation**: Memory/CPU allocation within _____ ms
-- [ ] Other initialization requirements: ________________
+**STAKEHOLDER RESPONSE**: <6 hour integration time target for developers, rapid system startup
+
+- [x] **Library initialization**: Complete within 100ms (must be fast for real-time applications)
+- [x] **First audio output**: Ready within 200ms of initialization
+- [x] **Configuration changes**: Apply new settings within 50ms
+- [x] **Frequency switching**: Change sampling frequency within 10ms (critical for AES5 applications)
+- [x] **Resource allocation**: Memory/CPU allocation within 50ms
+- [x] **Developer integration time**: <6 hours from download to working AES5-compliant application
+- [x] **Documentation requirement**: Must enable rapid integration via clear APIs and examples
 
 **Q4.3**: What scalability characteristics are required?
 
