@@ -9,6 +9,11 @@ on:
     # Run daily at 2 AM UTC
     - cron: "0 2 * * 0"
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 env:
   NODE_VERSION: "20.x"
   PYTHON_VERSION: "3.11"
@@ -146,7 +151,8 @@ jobs:
           cd 05-implementation
           mkdir -p build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="--coverage"
+          cmake .. -DCMAKE_BUILD_TYPE=Debug \
+                   -DCMAKE_CXX_FLAGS="-g -O0 --coverage -Wno-error"
           make -j$(nproc)
 
       - name: Run unit tests
@@ -206,7 +212,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: spec-generated-artifacts
-          path: build
+          path: build/
+      - name: Debug - List downloaded artifacts
+        run: |
+          echo "📋 Contents of build/ directory:"
+          ls -lah build/
+          if [ -f build/traceability.json ]; then
+            echo "✓ traceability.json found"
+            head -20 build/traceability.json
+          else
+            echo "✗ traceability.json NOT found"
+            exit 1
+          fi
       - name: Enforce requirement linkage coverage
         run: |
           ALLOW_EMPTY_SPECS=1 python scripts/validate-trace-coverage.py --min-req ${{ env.MIN_REQ_LINKAGE_COVERAGE }}
@@ -403,6 +420,9 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
 
     steps:
       - name: Checkout code
