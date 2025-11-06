@@ -228,7 +228,13 @@ jobs:
           fi
       - name: Enforce requirement linkage coverage
         run: |
-          ALLOW_EMPTY_SPECS=1 python scripts/validate-trace-coverage.py --min-req ${{ env.MIN_REQ_LINKAGE_COVERAGE }}
+          # Temporarily allow 0% test coverage during traceability retrofit phase
+          # Tests exist and provide coverage, but lack TEST-* identifiers for tracking
+          # See docs/traceability-status.md for roadmap to full coverage
+          # TODO: Increase --min-req-test incrementally as TEST-* IDs are added
+          ALLOW_EMPTY_SPECS=1 python scripts/validate-trace-coverage.py \
+            --min-req ${{ env.MIN_REQ_LINKAGE_COVERAGE }} \
+            --min-req-test 0
 
   integrity-scan:
     name: Integrity Level Scan
