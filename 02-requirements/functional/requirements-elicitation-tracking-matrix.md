@@ -1,4 +1,5 @@
 ---
+specType: guidance
 spec_id: REQ-ELICIT-002
 title: "Requirements Elicitation Tracking Matrix - AES5-2018"
 version: "1.0.0"

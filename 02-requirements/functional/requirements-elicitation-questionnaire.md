@@ -1,4 +1,5 @@
 ---
+specType: guidance
 spec_id: REQ-ELICIT-001
 title: "Requirements Elicitation Questionnaire - AES5-2018 Implementation"
 version: "1.0.0"

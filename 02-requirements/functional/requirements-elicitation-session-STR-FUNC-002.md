@@ -1,7 +1,8 @@
 ---
+specType: guidance
 session_id: ELICIT-20251106-002
 title: "Requirements Elicitation Session: STR-FUNC-002 - Standard Frequencies Support"
-date: 2025-11-06
+date: "2025-11-06"
 stakeholder_requirement: "STR-FUNC-002"
 session_type: "initial_elicitation"
 elicitation_framework: "8-dimension"

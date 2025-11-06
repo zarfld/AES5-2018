@@ -1,11 +1,15 @@
 ---
+specType: architecture
+standard: "42010"
 spec_id: ARCH-AES5-001
 title: "Software Architecture Specification - AES5-2018 Preferred Sampling Frequencies"
 version: "1.0.0"
+author: "AI Agent"
 date: "2025-11-06"
 status: "draft"
 phase: "03-architecture"
-requirements_trace: ["SYS-FUNC-001", "SYS-FUNC-002", "SYS-FUNC-003", "SYS-PERF-001", "SYS-REL-001", "SYS-PORT-001", "SYS-CONST-001", "SYS-CONST-002"]
+traceability:
+  requirements: ["REQ-F-001", "REQ-F-002", "REQ-F-003", "REQ-NF-001", "REQ-NF-002", "REQ-NF-003"]
 standards_compliance: ["ISO/IEC/IEEE-42010:2011", "AES5-2018"]
 architectural_style: "Layered Architecture with Dependency Injection"
 priority: "critical"

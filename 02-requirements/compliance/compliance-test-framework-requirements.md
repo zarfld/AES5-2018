@@ -4,9 +4,12 @@ standard: 29148
 phase: 02-requirements
 version: 1.0.0
 author: AI Agent
-date: 2025-11-06
+date: "2025-11-06"
 status: draft
 traceability:
+  stakeholderRequirements:
+    - StR-QUAL-001
+    - StR-COMP-001
   derives_from: "stakeholder-interview-results-7-lane.md"
   validates: "REQ-NF-C-001, REQ-NF-C-002"
 project:

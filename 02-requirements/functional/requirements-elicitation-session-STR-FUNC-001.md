@@ -1,7 +1,8 @@
 ---
+specType: guidance
 session_id: ELICIT-20251106-001
 title: "Requirements Elicitation Session: STR-FUNC-001 - AES5-2018 Primary Frequency Support"
-date: 2025-11-06
+date: "2025-11-06"
 stakeholder_requirement: "STR-FUNC-001"
 session_type: "initial_elicitation"
 elicitation_framework: "8-dimension"

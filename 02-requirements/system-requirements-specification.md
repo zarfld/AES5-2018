@@ -4,9 +4,13 @@ standard: 29148
 phase: 02-requirements
 version: 1.0.0
 author: AI Agent
-date: 2025-11-06
+date: "2025-11-06"
 status: draft
 traceability:
+  stakeholderRequirements:
+    - StR-FUNC-001
+    - StR-PERF-001
+    - StR-PORT-001
   stakeholder_requirements: "01-stakeholder-requirements/stakeholder-requirements-spec.md"
   interview_results: "02-requirements/functional/stakeholder-interview-results-7-lane.md"
   synthesis: "02-requirements/functional/requirements-synthesis-stakeholder-integration.md"

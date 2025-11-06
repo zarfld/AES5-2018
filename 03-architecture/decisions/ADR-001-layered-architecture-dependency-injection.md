@@ -1,16 +1,16 @@
 ---
 specType: architecture
-standard: 42010
+standard: "42010"
 phase: 03-architecture
 version: 1.0.0
 author: AI Agent  
 date: "2025-11-06"
-status: accepted
+status: approved
 traceability:
   requirements:
-    - SYS-CONST-001
-    - SYS-PORT-001
-    - SYS-PERF-001
+    - REQ-NF-001
+    - REQ-NF-002
+    - REQ-NF-003
 ---
 
 # ADR-001: Layered Architecture with Dependency Injection

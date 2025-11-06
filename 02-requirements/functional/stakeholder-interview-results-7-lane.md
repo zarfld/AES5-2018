@@ -1,7 +1,8 @@
 ---
+specType: guidance
 session_id: STAKEHOLDER-INTERVIEW-001
 title: "Stakeholder Interview Results: 7-Lane Structured Analysis for AES5-2018"
-date: 2025-11-06
+date: "2025-11-06"
 interview_type: "structured_7_lane"
 participants:
   - role: "Stakeholder Representative"

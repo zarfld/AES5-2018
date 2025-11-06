@@ -1,7 +1,8 @@
 ---
+specType: guidance
 session_id: ELICIT-20251106-004
 title: "Requirements Elicitation Session: STR-QUAL-001 - Performance Requirements"
-date: 2025-11-06
+date: "2025-11-06"
 stakeholder_requirement: "STR-QUAL-001"
 session_type: "initial_elicitation"
 elicitation_framework: "8-dimension"

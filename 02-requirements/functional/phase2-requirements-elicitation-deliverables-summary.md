@@ -1,4 +1,5 @@
 ---
+specType: guidance
 spec_id: REQ-ELICIT-SUMMARY-001
 title: "Phase 2 Requirements Elicitation Deliverables Summary - AES5-2018"
 version: "1.0.0"

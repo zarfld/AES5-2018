@@ -1,4 +1,5 @@
 ---
+specType: guidance
 spec_id: SRS-AES5-001
 title: "System Requirements Specification - AES5-2018 Preferred Sampling Frequencies"
 version: "1.0.0"

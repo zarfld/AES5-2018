@@ -1,16 +1,16 @@
 ---
 specType: architecture
-standard: 42010
+standard: "42010"
 phase: 03-architecture
 version: 1.0.0
 author: AI Agent
 date: "2025-11-06"
-status: accepted
+status: approved
 traceability:
   requirements:
-    - SYS-PORT-001
-    - SYS-MAIN-001
-    - SYS-FUNC-001
+    - REQ-NF-001
+    - REQ-NF-002
+    - REQ-F-001
 ---
 
 # ADR-003: C++17 Implementation with C API Bindings

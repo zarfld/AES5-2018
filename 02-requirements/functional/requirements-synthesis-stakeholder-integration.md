@@ -1,7 +1,8 @@
 ---
+specType: guidance
 document_id: REQ-SYNTHESIS-001
 title: "Requirements Synthesis: Stakeholder Interview Integration"
-date: 2025-11-06
+date: "2025-11-06"
 phase: "Phase 2 - Requirements Analysis"
 status: "synthesis_complete"
 next_phase: "System Requirements Generation"
