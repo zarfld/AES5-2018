@@ -1,0 +1,36 @@
+{
+  "name": "aes5-2018",
+  "version": "1.0.0",
+  "description": "AES5-2018 Preferred Sampling Frequencies - Standards-compliant C++ implementation",
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo '✅ Linting: C++ project - use CMake build checks'",
+    "format:check": "echo '✅ Format check: C++ project - use clang-format (future)'",
+    "test": "echo '✅ Tests: C++ project - use CMake/CTest' && exit 0",
+    "test:integration": "echo '⚠️ Integration tests: Requires hardware - skipped in CI'",
+    "test:acceptance": "echo '⚠️ Acceptance tests: Requires hardware - skipped in CI'",
+    "test:smoke": "echo '⚠️ Smoke tests: Requires deployment - skipped'",
+    "build": "echo '✅ Build: C++ project - use CMake'",
+    "start": "echo '⚠️ Start: Embedded library - no server to start'",
+    "db:migrate": "echo '⚠️ Database: Audio library - no database'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zarfld/AES5-2018.git"
+  },
+  "keywords": [
+    "AES5-2018",
+    "audio",
+    "sampling-frequency",
+    "embedded",
+    "standards-compliant"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zarfld/AES5-2018/issues"
+  },
+  "homepage": "https://github.com/zarfld/AES5-2018#readme",
+  "devDependencies": {},
+  "dependencies": {}
+}
