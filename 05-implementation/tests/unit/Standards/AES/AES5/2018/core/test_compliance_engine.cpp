@@ -194,8 +194,6 @@ TEST_F(ComplianceEngineTest, MeetPerformanceRequirements) {
  */
 TEST_F(ComplianceEngineTest, ValidateMemoryFootprint) {
     // When: Creating ComplianceEngine instance
-    ComplianceEngine engine;
-    
     // Then: Memory footprint should be minimal (target: <1KB per component)
     size_t memory_usage = sizeof(ComplianceEngine);
     EXPECT_LE(memory_usage, 1024) << "ComplianceEngine uses " << memory_usage 

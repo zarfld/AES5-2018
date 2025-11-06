@@ -228,8 +228,9 @@ TEST_F(ValidationCoreTest, RealTimeConstraintsValidation) {
     
     // Manually inject a slow latency measurement to test constraint logic
     // This avoids Windows debug timing variability issues
-    ValidationResult mock_result = ValidationResult::Valid;
-    uint64_t simulated_slow_latency = 500000; // 500μs simulated
+    // Note: Variables marked as potentially unused for future extension
+    [[maybe_unused]] ValidationResult mock_result = ValidationResult::Valid;
+    [[maybe_unused]] uint64_t simulated_slow_latency = 500000; // 500μs simulated
     
     // Update metrics directly with simulated timing
     core_->validate(48000, always_valid_validator);  // Fast validation
