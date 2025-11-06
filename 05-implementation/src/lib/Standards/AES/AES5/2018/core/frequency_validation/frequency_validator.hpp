@@ -348,6 +348,9 @@ private:
      * @traceability DES-C-001 → initialize_tolerance_tables
      */
     void initialize_tolerance_tables() noexcept;
+    
+    // Friend function for ValidationCore integration
+    friend validation::ValidationResult frequency_validation_function(uint32_t frequency, void* context) noexcept;
 
     // Component Dependencies (injected via constructor)
     std::unique_ptr<compliance::ComplianceEngine> compliance_engine_;  ///< AES5-2018 compliance validation
@@ -359,6 +362,7 @@ private:
 
     // Performance optimization data
     mutable std::array<uint32_t, 6> standard_frequencies_;                  ///< Sorted standard frequencies for binary search
+    mutable uint32_t current_tolerance_ppm_;                                 ///< Current tolerance for static function access
 };
 
 /**
