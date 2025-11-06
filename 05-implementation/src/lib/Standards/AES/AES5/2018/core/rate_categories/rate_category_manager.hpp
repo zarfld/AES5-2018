@@ -13,6 +13,8 @@
 
 #include <memory>
 #include <cstdint>
+#include <array>
+#include <atomic>
 #include "../validation/validation_core.hpp"
 
 namespace AES {
@@ -218,6 +220,13 @@ private:
     mutable uint32_t last_frequency_;      ///< Cache last frequency for optimization
     mutable RateCategory last_category_;   ///< Cache last category for optimization
     mutable double last_multiplier_;       ///< Cache last multiplier for optimization
+    
+    // Internal lookup table for performance optimization
+    static constexpr size_t LOOKUP_TABLE_SIZE = 32;
+    mutable std::array<uint32_t, LOOKUP_TABLE_SIZE> frequency_cache_;
+    mutable std::array<RateCategory, LOOKUP_TABLE_SIZE> category_cache_;
+    mutable std::array<double, LOOKUP_TABLE_SIZE> multiplier_cache_;
+    mutable std::atomic<size_t> cache_index_{0};  ///< Current cache index
 };
 
 /**

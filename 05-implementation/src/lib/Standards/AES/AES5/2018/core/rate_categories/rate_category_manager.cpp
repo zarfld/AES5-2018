@@ -52,7 +52,10 @@ RateCategoryManager::RateCategoryManager(
     , last_frequency_(0)
     , last_category_(RateCategory::Unknown)
     , last_multiplier_(0.0) {
-    // RED PHASE: Basic initialization
+    // GREEN PHASE: Initialize lookup tables for performance optimization
+    frequency_cache_.fill(0);
+    category_cache_.fill(RateCategory::Unknown);
+    multiplier_cache_.fill(0.0);
 }
 
 // Factory method
@@ -69,15 +72,37 @@ std::unique_ptr<RateCategoryManager> RateCategoryManager::create(
         std::move(validation_core)));
 }
 
-// Main classification method - RED PHASE: Stub implementation
+// Main classification method - GREEN PHASE: AES5-2018 Section 5.3 implementation
 RateCategoryResult RateCategoryManager::classify_rate_category(uint32_t frequency_hz) const noexcept {
-    // RED PHASE: Stub implementation that will fail tests
+    // Performance optimization: Check cached result first
+    if (frequency_hz == last_frequency_) {
+        RateCategoryResult result;
+        result.frequency_hz = frequency_hz;
+        result.category = last_category_;
+        result.multiplier = last_multiplier_;
+        result.valid = (last_category_ != RateCategory::Unknown);
+        return result;
+    }
     
+    // Always record metrics via ValidationCore for new frequencies
+    validation_core_->validate(frequency_hz, rate_category_validation_function, const_cast<RateCategoryManager*>(this));
+    
+    // Classify rate category using AES5-2018 Section 5.3 ranges
+    RateCategory category = classify_rate_category_internal(frequency_hz);
+    double multiplier = calculate_multiplier_internal(frequency_hz);
+    bool valid = (category != RateCategory::Unknown);
+    
+    // Cache result for performance optimization
+    last_frequency_ = frequency_hz;
+    last_category_ = category;
+    last_multiplier_ = multiplier;
+    
+    // Build result structure
     RateCategoryResult result;
     result.frequency_hz = frequency_hz;
-    result.category = RateCategory::Unknown;  // Always unknown in RED phase
-    result.multiplier = 0.0;
-    result.valid = false;  // Always invalid in RED phase
+    result.category = category;
+    result.multiplier = multiplier;
+    result.valid = valid;
     
     return result;
 }
@@ -120,23 +145,76 @@ bool RateCategoryManager::is_valid_rate_category(uint32_t frequency_hz) const no
     return result.is_valid();
 }
 
-// Internal implementation methods - RED PHASE: Stubs
+// Internal implementation methods - GREEN PHASE: AES5-2018 Section 5.3 logic
 RateCategory RateCategoryManager::classify_rate_category_internal(uint32_t frequency_hz) const noexcept {
-    // RED PHASE: Always return unknown
+    // AES5-2018 Section 5.3 rate category classification
+    
+    // Quarter rate: 7.75-13.5 kHz
+    if (frequency_hz >= QUARTER_RATE_MIN_HZ && frequency_hz <= QUARTER_RATE_MAX_HZ) {
+        return RateCategory::Quarter;
+    }
+    
+    // Half rate: 15.5-27 kHz
+    if (frequency_hz >= HALF_RATE_MIN_HZ && frequency_hz <= HALF_RATE_MAX_HZ) {
+        return RateCategory::Half;
+    }
+    
+    // Basic rate: 31-54 kHz (includes 32k, 44.1k, 48k)
+    if (frequency_hz >= BASIC_RATE_MIN_HZ && frequency_hz <= BASIC_RATE_MAX_HZ) {
+        return RateCategory::Basic;
+    }
+    
+    // Double rate: 62-108 kHz (includes 88.2k, 96k)
+    if (frequency_hz >= DOUBLE_RATE_MIN_HZ && frequency_hz <= DOUBLE_RATE_MAX_HZ) {
+        return RateCategory::Double;
+    }
+    
+    // Quadruple rate: 124-216 kHz (includes 176.4k, 192k)
+    if (frequency_hz >= QUADRUPLE_RATE_MIN_HZ && frequency_hz <= QUADRUPLE_RATE_MAX_HZ) {
+        return RateCategory::Quadruple;
+    }
+    
+    // Octuple rate: 248-432 kHz (includes 352.8k, 384k)
+    if (frequency_hz >= OCTUPLE_RATE_MIN_HZ && frequency_hz <= OCTUPLE_RATE_MAX_HZ) {
+        return RateCategory::Octuple;
+    }
+    
+    // No matching category
     return RateCategory::Unknown;
 }
 
 double RateCategoryManager::calculate_multiplier_internal(uint32_t frequency_hz) const noexcept {
-    // RED PHASE: Always return 0.0
-    return 0.0;
+    // Calculate multiplier relative to 48 kHz base frequency
+    // Return 0.0 for invalid frequencies (outside any rate category)
+    if (frequency_hz == 0) {
+        return 0.0;
+    }
+    
+    // Check if frequency is in a valid AES5-2018 rate category
+    RateCategory category = classify_rate_category_internal(frequency_hz);
+    if (category == RateCategory::Unknown) {
+        return 0.0;  // Invalid frequencies should have 0.0 multiplier
+    }
+    
+    return static_cast<double>(frequency_hz) / static_cast<double>(BASE_FREQUENCY_HZ);
 }
 
 // Static validation function for ValidationCore
 validation::ValidationResult RateCategoryManager::rate_category_validation_function(
     uint32_t frequency, void* context) noexcept {
     
-    // RED PHASE: Always return invalid
-    return validation::ValidationResult::InvalidInput;
+    // Cast context to RateCategoryManager for classification
+    if (!context) {
+        return validation::ValidationResult::InvalidInput;
+    }
+    
+    auto* manager = static_cast<const RateCategoryManager*>(context);
+    // Use internal classification to avoid recursion
+    auto category = manager->classify_rate_category_internal(frequency);
+    
+    return (category != RateCategory::Unknown) ? 
+        validation::ValidationResult::Valid : 
+        validation::ValidationResult::InvalidInput;
 }
 
 // Utility functions
