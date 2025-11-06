@@ -59,9 +59,9 @@ add_library(aes5_standards STATIC
     src/lib/Standards/AES/AES5/2018/core/compliance/compliance_engine.cpp
     src/lib/Standards/AES/AES5/2018/core/validation/validation_core.cpp          # DES-C-005
     src/lib/Standards/AES/AES5/2018/core/frequency_validation/frequency_validator.cpp  # DES-C-001
+    src/lib/Standards/AES/AES5/2018/core/rate_categories/rate_category_manager.cpp     # DES-C-003
     
     # Additional components will be added in subsequent TDD cycles:
-    # src/lib/Standards/AES/AES5/2018/core/rate_categories/rate_category_manager.cpp     # DES-C-003
     # src/lib/Standards/AES/AES5/2018/conversion/frequency_converter.cpp          # DES-C-002
 )
 
@@ -146,6 +146,18 @@ target_link_libraries(frequency_validator_tests PRIVATE
     gtest_main
 )
 
+# Unit Tests - RateCategoryManager (DES-C-003)
+add_executable(rate_category_manager_tests
+    tests/unit/Standards/AES/AES5/2018/core/test_rate_category_manager.cpp
+)
+
+target_link_libraries(rate_category_manager_tests PRIVATE
+    aes5_standards
+    aes5_test_framework
+    gtest
+    gtest_main
+)
+
 # Register ComplianceEngine tests with CTest
 add_test(NAME ComplianceEngineUnitTests COMMAND compliance_engine_tests)
 
@@ -154,6 +166,9 @@ add_test(NAME ValidationCoreUnitTests COMMAND validation_core_tests)
 
 # Register FrequencyValidator tests with CTest
 add_test(NAME FrequencyValidatorUnitTests COMMAND frequency_validator_tests)
+
+# Register RateCategoryManager tests with CTest
+add_test(NAME RateCategoryManagerUnitTests COMMAND rate_category_manager_tests)
 
 # Performance Benchmarks
 add_executable(frequency_validator_benchmark
@@ -181,6 +196,11 @@ set_tests_properties(ValidationCoreUnitTests PROPERTIES
 )
 
 set_tests_properties(FrequencyValidatorUnitTests PROPERTIES
+    TIMEOUT 30
+    ENVIRONMENT "GTEST_COLOR=1"
+)
+
+set_tests_properties(RateCategoryManagerUnitTests PROPERTIES
     TIMEOUT 30
     ENVIRONMENT "GTEST_COLOR=1"
 )
