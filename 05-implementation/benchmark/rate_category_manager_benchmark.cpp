@@ -92,6 +92,9 @@ public:
             
             auto end = std::chrono::high_resolution_clock::now();
             
+            // Prevent compiler from optimizing away the result
+            (void)result;
+            
             double latency_us = std::chrono::duration<double, std::micro>(end - start).count();
             latencies_us.push_back(latency_us);
         }

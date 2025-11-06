@@ -67,6 +67,9 @@ BenchmarkResult benchmark_validation(frequency_validation::FrequencyValidator* v
         auto result = validator->validate_frequency(freq, 25);
         auto end = std::chrono::high_resolution_clock::now();
         
+        // Prevent compiler from optimizing away the result
+        (void)result;
+        
         auto latency_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
         latencies.push_back(static_cast<double>(latency_ns));
     }
