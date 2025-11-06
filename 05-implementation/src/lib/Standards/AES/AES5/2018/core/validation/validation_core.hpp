@@ -48,6 +48,8 @@ enum class ValidationResult : uint8_t {
 /**
  * @brief Performance metrics for validation operations
  * @traceability DES-C-005 → Performance Metrics
+ * 
+ * Note: Non-copyable due to atomic members for thread safety
  */
 struct ValidationMetrics {
     std::atomic<uint64_t> total_validations{0};      ///< Total validation calls
@@ -55,6 +57,13 @@ struct ValidationMetrics {
     std::atomic<uint64_t> failed_validations{0};     ///< Failed validations
     std::atomic<uint64_t> max_latency_ns{0};         ///< Maximum latency in nanoseconds
     std::atomic<uint64_t> total_latency_ns{0};       ///< Total cumulative latency
+    
+    // Make non-copyable due to atomic members
+    ValidationMetrics() = default;
+    ValidationMetrics(const ValidationMetrics&) = delete;
+    ValidationMetrics& operator=(const ValidationMetrics&) = delete;
+    ValidationMetrics(ValidationMetrics&&) = delete;
+    ValidationMetrics& operator=(ValidationMetrics&&) = delete;
     
     /**
      * @brief Get average validation latency in nanoseconds
@@ -200,7 +209,7 @@ public:
      * @performance <10μs
      * @thread_safety Thread-safe
      */
-    ValidationMetrics get_metrics() const noexcept;
+    const ValidationMetrics& get_metrics() const noexcept;
 
     /**
      * @brief Reset performance metrics to zero

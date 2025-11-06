@@ -55,11 +55,11 @@ set(TESTS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
 # AES5-2018 Standards Library (Hardware-agnostic implementation)
 add_library(aes5_standards STATIC
-    # Core compliance and validation components (Phase 5.1)
+    # Core compliance and validation components (Phase 5.1 & 5.2)
     src/lib/Standards/AES/AES5/2018/core/compliance/compliance_engine.cpp
+    src/lib/Standards/AES/AES5/2018/core/validation/validation_core.cpp          # DES-C-005
     
     # Additional components will be added in subsequent TDD cycles:
-    # src/lib/Standards/AES/AES5/2018/core/validation/validation_core.cpp          # DES-C-005
     # src/lib/Standards/AES/AES5/2018/core/frequency_validation/frequency_validator.cpp  # DES-C-001
     # src/lib/Standards/AES/AES5/2018/core/rate_categories/rate_category_manager.cpp     # DES-C-003
     # src/lib/Standards/AES/AES5/2018/conversion/frequency_converter.cpp          # DES-C-002
@@ -122,11 +122,31 @@ target_link_libraries(compliance_engine_tests PRIVATE
     gtest_main
 )
 
+# Unit Tests - ValidationCore (DES-C-005)
+add_executable(validation_core_tests
+    tests/unit/Standards/AES/AES5/2018/core/test_validation_core.cpp
+)
+
+target_link_libraries(validation_core_tests PRIVATE
+    aes5_standards
+    aes5_test_framework
+    gtest
+    gtest_main
+)
+
 # Register ComplianceEngine tests with CTest
 add_test(NAME ComplianceEngineUnitTests COMMAND compliance_engine_tests)
 
+# Register ValidationCore tests with CTest
+add_test(NAME ValidationCoreUnitTests COMMAND validation_core_tests)
+
 # Set test properties for better output
 set_tests_properties(ComplianceEngineUnitTests PROPERTIES
+    TIMEOUT 30
+    ENVIRONMENT "GTEST_COLOR=1"
+)
+
+set_tests_properties(ValidationCoreUnitTests PROPERTIES
     TIMEOUT 30
     ENVIRONMENT "GTEST_COLOR=1"
 )
@@ -136,7 +156,7 @@ set_tests_properties(ComplianceEngineUnitTests PROPERTIES
 # Target: Run all tests
 add_custom_target(run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --verbose
-    DEPENDS compliance_engine_tests
+    DEPENDS compliance_engine_tests validation_core_tests
     COMMENT "Running all TDD tests"
 )
 
@@ -150,6 +170,9 @@ if(GCOVR_PATH AND CMAKE_BUILD_TYPE STREQUAL "Debug")
         
         target_compile_options(compliance_engine_tests PRIVATE --coverage)
         target_link_options(compliance_engine_tests PRIVATE --coverage)
+        
+        target_compile_options(validation_core_tests PRIVATE --coverage)
+        target_link_options(validation_core_tests PRIVATE --coverage)
     endif()
     
     add_custom_target(coverage
@@ -157,7 +180,7 @@ if(GCOVR_PATH AND CMAKE_BUILD_TYPE STREQUAL "Debug")
         COMMAND ${GCOVR_PATH} --root ${CMAKE_SOURCE_DIR} --html --html-details 
                 --exclude ${CMAKE_SOURCE_DIR}/tests 
                 --output coverage_report.html
-        DEPENDS compliance_engine_tests
+        DEPENDS compliance_engine_tests validation_core_tests
         COMMENT "Generating test coverage report"
     )
 endif()
