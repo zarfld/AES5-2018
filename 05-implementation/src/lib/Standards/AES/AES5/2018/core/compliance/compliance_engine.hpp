@@ -33,6 +33,18 @@ namespace core {
 namespace compliance {
 
 /**
+ * @brief AES5-2018 specification clauses for compliance validation
+ * @traceability DES-C-004 → AES5Clause
+ */
+enum class AES5Clause : uint8_t {
+    Section_5_1 = 1,    ///< Primary sampling frequency (48 kHz)
+    Section_5_2 = 2,    ///< Other sampling frequencies (44.1 kHz, 96 kHz)
+    Section_5_4 = 4,    ///< Legacy sampling frequencies (32 kHz)
+    Annex_A = 10,       ///< Pull-up/pull-down variants (video sync)
+    Unknown = 255       ///< Unknown or non-standard frequency
+};
+
+/**
  * @brief AES5-2018 Compliance Verification Engine
  * @traceability DES-C-004
  * 
