@@ -134,13 +134,11 @@ def main() -> int:
                 print(f"WARN: failed to parse {path}: {e}", file=sys.stderr)
 
     # Parse test source files for TEST-* identifiers and requirement references.
-    # Pattern to match @test TEST-ID: ... followed by @requirements REQ-*
-    test_block_pattern = re.compile(
-        r'@test\s+(TEST-[A-Z0-9\-]+):.*?(?:@requirements?\s+((?:REQ-[A-Z0-9\-]+(?:\s*,\s*)?)+))?',
-        re.IGNORECASE | re.DOTALL
-    )
-    test_id_fallback = re.compile(r'\b(TEST-[A-Z0-9\-]+)\b')
+    # Pattern to match @test TEST-ID on one line, then @requirements on a nearby line
+    test_id_pattern = re.compile(r'@test\s+(TEST-[A-Z0-9\-]+)', re.IGNORECASE)
+    req_annotation_pattern = re.compile(r'@requirements?\s+((?:REQ-[A-Z0-9\-]+(?:\s*,\s*)?)+)', re.IGNORECASE)
     req_ref_pattern = re.compile(r'\b(REQ-[A-Z0-9\-]+)\b')
+    test_id_fallback = re.compile(r'\b(TEST-[A-Z0-9\-]+)\b')
     
     for tdir in CODE_TEST_DIRS:
         if not tdir.exists():
@@ -153,13 +151,29 @@ def main() -> int:
                     print(f"WARN: failed to read test file {src}: {e}", file=sys.stderr)
                     continue
                 
-                # Try structured parsing first (looking for @test ... @requirements blocks)
-                matched_tests = set()
-                for match in test_block_pattern.finditer(text):
-                    test_id = match.group(1)
-                    req_block = match.group(2) if match.lastindex >= 2 else ""
-                    req_refs = sorted(set(req_ref_pattern.findall(req_block))) if req_block else []
-                    matched_tests.add(test_id)
+                # Try structured parsing: find @test lines and look for @requirements nearby
+                lines = text.splitlines()
+                matched_tests = {}  # test_id -> [req_refs]
+                
+                for i, line in enumerate(lines):
+                    test_match = test_id_pattern.search(line)
+                    if test_match:
+                        test_id = test_match.group(1)
+                        # Look for @requirements in next 10 lines (within same comment block)
+                        req_refs = []
+                        for j in range(i, min(i + 10, len(lines))):
+                            req_match = req_annotation_pattern.search(lines[j])
+                            if req_match:
+                                req_block = req_match.group(1)
+                                req_refs = sorted(set(req_ref_pattern.findall(req_block)))
+                                break
+                            # Stop at end of comment block
+                            if '*/' in lines[j] or 'TEST_F' in lines[j] or 'TEST(' in lines[j]:
+                                break
+                        matched_tests[test_id] = req_refs
+                
+                # Add structured tests
+                for test_id, req_refs in matched_tests.items():
                     all_items.append({
                         'id': test_id,
                         'title': src.stem,
