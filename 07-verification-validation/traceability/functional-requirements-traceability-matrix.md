@@ -28,11 +28,14 @@ This document establishes complete traceability between stakeholder functional r
 
 ### Requirements Traceability Summary
 
-| Requirement ID | AES5-2018 Clause | Implementation Component | Verification Method | Status |
-|---|---|---|---|---|
-| STR-FUNC-001 | Section 5.1 | `core::frequency_validation::PrimaryFrequencyValidator` | Unit + Compliance Tests | Planned |
-| STR-FUNC-002 | Section 5.2 | `core::frequency_validation::OtherFrequencyValidator` | Unit + Compliance Tests | Planned |
-| STR-FUNC-003 | Section 5.3 | `core::rate_categories::*RateManager` | Unit + Compliance Tests | Planned |
+| Stakeholder Requirement | System Requirement | AES5-2018 Clause | Implementation Component | Verification Method | Status |
+|---|---|---|---|---|---|
+| STR-FUNC-001 | REQ-F-001, REQ-F-002, REQ-F-003 | Section 5.1 | `core::frequency_validation::PrimaryFrequencyValidator` | Unit + Compliance Tests | SRS Complete |
+| STR-FUNC-002 | REQ-F-004, REQ-F-005, REQ-F-006 | Section 5.2 | `core::frequency_validation::OtherFrequencyValidator` | Unit + Compliance Tests | SRS Complete |
+| STR-FUNC-003 | REQ-F-007, REQ-F-008, REQ-F-009 | Section 5.3 | `core::rate_categories::*RateManager` | Unit + Compliance Tests | SRS Complete |
+| STR-QUAL-001 | REQ-NF-P-001 through REQ-NF-P-005 | Performance Compliance | `core::performance::*` | Performance + Load Tests | SRS Complete |
+| STR-CONST-001 | REQ-F-010, REQ-F-011, REQ-F-012 | Hardware Abstraction | `common::interfaces::*` | Architecture + Integration Tests | SRS Complete |
+| STR-CONST-002 | REQ-NF-C-001, REQ-NF-C-002, REQ-NF-C-003 | Standards Compliance | `compliance::validation::*` | Automated Compliance Tests | SRS Complete |
 
 ---
 
