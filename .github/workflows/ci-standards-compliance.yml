@@ -168,9 +168,9 @@ jobs:
         run: |
           echo "📊 Generating test coverage report..."
           cd 05-implementation/build
-          lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' --output-file coverage.info
-          lcov --list coverage.info
+          lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,inconsistent
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info --ignore-errors mismatch,inconsistent
+          lcov --list coverage.info --ignore-errors mismatch,inconsistent
           COVERAGE=$(lcov --summary coverage.info 2>&1 | grep "lines" | awk '{print $2}' | sed 's/%//')
           echo "Current coverage: ${COVERAGE}%"
           echo "COVERAGE=${COVERAGE}" >> $GITHUB_ENV
