@@ -83,9 +83,14 @@ TEST_F(FrequencyValidatorTest, FactoryMethodCreatesValidValidator) {
 }
 
 /**
+ * @test TEST-FREQ-001
  * @brief Test primary frequency validation (48 kHz)
- * @requirement AES5-FREQ-001: Primary sampling frequency (AES5-2018 Section 5.1)
- * @traceability TEST-C-001-002 → DES-C-001 → AES5-FREQ-001
+ * @requirements REQ-F-001, REQ-F-002, REQ-NF-P-001
+ * @design DES-C-001
+ * @traceability TEST-FREQ-001 → DES-C-001 → REQ-F-001, REQ-F-002, REQ-NF-P-001
+ * 
+ * Validates FrequencyValidator correctly identifies and validates 48 kHz
+ * as the primary sampling frequency per AES5-2018 Section 5.1.
  */
 TEST_F(FrequencyValidatorTest, ValidatePrimaryFrequency48kHz) {
     // Given: AES5-2018 primary sampling frequency
@@ -109,9 +114,14 @@ TEST_F(FrequencyValidatorTest, ValidatePrimaryFrequency48kHz) {
 }
 
 /**
+ * @test TEST-FREQ-002
  * @brief Test consumer frequency validation (44.1 kHz)
- * @requirement AES5-FREQ-002: Consumer sampling frequency (AES5-2018 Section 5.2)
- * @traceability TEST-C-001-003 → DES-C-001 → AES5-FREQ-002
+ * @requirements REQ-F-004, REQ-F-002
+ * @design DES-C-001
+ * @traceability TEST-FREQ-002 → DES-C-001 → REQ-F-004
+ * 
+ * Validates FrequencyValidator correctly identifies 44.1 kHz consumer
+ * frequency per AES5-2018 Section 5.2.
  */
 TEST_F(FrequencyValidatorTest, ValidateConsumerFrequency44_1kHz) {
     // Given: AES5-2018 consumer sampling frequency
@@ -130,9 +140,14 @@ TEST_F(FrequencyValidatorTest, ValidateConsumerFrequency44_1kHz) {
 }
 
 /**
+ * @test TEST-FREQ-003
  * @brief Test high bandwidth frequency validation (96 kHz)
- * @requirement AES5-FREQ-003: High bandwidth sampling frequency (AES5-2018 Section 5.2)
- * @traceability TEST-C-001-004 → DES-C-001 → AES5-FREQ-003
+ * @requirements REQ-F-005, REQ-F-002
+ * @design DES-C-001
+ * @traceability TEST-FREQ-003 → DES-C-001 → REQ-F-005
+ * 
+ * Validates FrequencyValidator correctly identifies 96 kHz high bandwidth
+ * frequency per AES5-2018 Section 5.2.
  */
 TEST_F(FrequencyValidatorTest, ValidateHighBandwidthFrequency96kHz) {
     // Given: AES5-2018 high bandwidth sampling frequency
@@ -151,9 +166,13 @@ TEST_F(FrequencyValidatorTest, ValidateHighBandwidthFrequency96kHz) {
 }
 
 /**
+ * @test TEST-FREQ-004  
  * @brief Test legacy frequency validation (32 kHz)
- * @requirement AES5-FREQ-004: Legacy sampling frequency (AES5-2018 Section 5.4)
- * @traceability TEST-C-001-005 → DES-C-001 → AES5-FREQ-004
+ * @requirements REQ-F-006
+ * @design DES-C-001
+ * @traceability TEST-FREQ-004 → DES-C-001 → REQ-F-006
+ * 
+ * Validates 32 kHz legacy frequency per AES5-2018 Section 5.4.
  */
 TEST_F(FrequencyValidatorTest, ValidateLegacyFrequency32kHz) {
     // Given: AES5-2018 legacy sampling frequency
@@ -172,9 +191,13 @@ TEST_F(FrequencyValidatorTest, ValidateLegacyFrequency32kHz) {
 }
 
 /**
+ * @test TEST-FREQ-005
  * @brief Test pull-up/pull-down frequency validation
- * @requirement AES5-FREQ-005: Pull-up/pull-down variants (AES5-2018 Annex A)
- * @traceability TEST-C-001-006 → DES-C-001 → AES5-FREQ-005
+ * @requirements REQ-F-007, REQ-F-008
+ * @design DES-C-001
+ * @traceability TEST-FREQ-005 → DES-C-001 → REQ-F-007, REQ-F-008
+ * 
+ * Validates pull-up/pull-down variants per AES5-2018 Annex A.
  */
 TEST_F(FrequencyValidatorTest, ValidatePullUpPullDownFrequencies) {
     // Given: AES5-2018 pull-up frequency (48000 * 1001/1000)

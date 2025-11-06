@@ -67,9 +67,13 @@ TEST_F(RateCategoryManagerTest, FactoryMethodCreatesValidManager) {
 }
 
 /**
+ * @test TEST-RATE-001
  * @brief Test basic rate category classification (31-54 kHz)
- * @requirement AES5-BASIC-RATE: Basic rate category support
- * @traceability TEST-C-003-002 → DES-C-003 → AES5-BASIC-RATE
+ * @requirements REQ-F-009, REQ-NF-P-002
+ * @design DES-C-003
+ * @traceability TEST-RATE-001 → DES-C-003 → REQ-F-009, REQ-NF-P-002
+ * 
+ * Validates basic rate category classification per AES5-2018 Section 5.3.
  */
 TEST_F(RateCategoryManagerTest, ClassifyBasicRateCategory) {
     // Test cases for basic rate category (AES5-2018 Section 5.3)
@@ -106,9 +110,13 @@ TEST_F(RateCategoryManagerTest, ClassifyBasicRateCategory) {
 }
 
 /**
+ * @test TEST-RATE-002
  * @brief Test double rate category classification (62-108 kHz)
- * @requirement AES5-DOUBLE-RATE: Double rate category support
- * @traceability TEST-C-003-003 → DES-C-003 → AES5-DOUBLE-RATE
+ * @requirements REQ-F-009, REQ-NF-P-002
+ * @design DES-C-003
+ * @traceability TEST-RATE-002 → DES-C-003 → REQ-F-009
+ * 
+ * Validates double rate category per AES5-2018 Section 5.3.
  */
 TEST_F(RateCategoryManagerTest, ClassifyDoubleRateCategory) {
     // Test cases for double rate category
@@ -141,9 +149,13 @@ TEST_F(RateCategoryManagerTest, ClassifyDoubleRateCategory) {
 }
 
 /**
+ * @test TEST-RATE-003
  * @brief Test quadruple rate category classification (124-216 kHz)
- * @requirement AES5-QUADRUPLE-RATE: Quadruple rate category support
- * @traceability TEST-C-003-004 → DES-C-003 → AES5-QUADRUPLE-RATE
+ * @requirements REQ-F-009, REQ-NF-P-002
+ * @design DES-C-003
+ * @traceability TEST-RATE-003 → DES-C-003 → REQ-F-009
+ * 
+ * Validates quadruple rate category per AES5-2018 Section 5.3.
  */
 TEST_F(RateCategoryManagerTest, ClassifyQuadrupleRateCategory) {
     // Test cases for quadruple rate category
@@ -284,9 +296,13 @@ TEST_F(RateCategoryManagerTest, RateMultiplierCalculations) {
 }
 
 /**
+ * @test TEST-PERF-001
  * @brief Test performance constraints (<10μs per classification)
- * @requirement AES5-PERFORMANCE-003: Rate classification performance
- * @traceability TEST-C-003-009 → DES-C-003 → AES5-PERFORMANCE-003
+ * @requirements REQ-NF-P-001, REQ-NF-P-002, REQ-NF-P-003
+ * @design DES-C-003
+ * @traceability TEST-PERF-001 → DES-C-003 → REQ-NF-P-001, REQ-NF-P-002, REQ-NF-P-003
+ * 
+ * Validates rate classification meets <10μs performance requirement.
  */
 TEST_F(RateCategoryManagerTest, PerformanceConstraints) {
     constexpr size_t iterations = 1000;

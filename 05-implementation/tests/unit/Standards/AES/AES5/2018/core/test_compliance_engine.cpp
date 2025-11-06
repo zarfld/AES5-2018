@@ -50,9 +50,13 @@ protected:
 // RED PHASE TESTS - These will initially fail to compile, which is expected
 
 /**
+ * @test TEST-COMP-001
  * @brief Test AES5-2018 Section 5.1 - Primary sampling frequency (48 kHz)
- * @requirement SYS-FUNC-001: Support 48 kHz primary sampling frequency
- * @traceability TEST-C-004-001 → DES-C-004 → SYS-FUNC-001
+ * @requirements REQ-F-001, REQ-F-002, REQ-NF-C-001
+ * @design DES-C-004
+ * @traceability TEST-COMP-001 → DES-C-004 → REQ-F-001, REQ-F-002, REQ-NF-C-001
+ * 
+ * Verifies 48 kHz compliance with AES5-2018 Section 5.1.
  */
 TEST_F(ComplianceEngineTest, VerifyAES5Section5_1_PrimaryFrequency48kHz) {
     // Given: 48 kHz frequency and AES5-2018 Section 5.1 reference
@@ -72,9 +76,13 @@ TEST_F(ComplianceEngineTest, VerifyAES5Section5_1_PrimaryFrequency48kHz) {
 }
 
 /**
+ * @test TEST-COMP-002
  * @brief Test AES5-2018 Section 5.2 - Other recommended frequencies
- * @requirement SYS-FUNC-002: Support other sampling frequencies
- * @traceability TEST-C-004-002 → DES-C-004 → SYS-FUNC-002
+ * @requirements REQ-F-004, REQ-F-005, REQ-NF-C-002
+ * @design DES-C-004
+ * @traceability TEST-COMP-002 → DES-C-004 → REQ-F-004, REQ-F-005
+ * 
+ * Verifies 44.1 kHz and 96 kHz compliance with AES5-2018 Section 5.2.
  */
 TEST_F(ComplianceEngineTest, VerifyAES5Section5_2_OtherFrequencies) {
     // Given: 44.1 kHz and 96 kHz frequencies (AES5-2018 Section 5.2)
@@ -89,9 +97,13 @@ TEST_F(ComplianceEngineTest, VerifyAES5Section5_2_OtherFrequencies) {
 }
 
 /**
+ * @test TEST-COMP-003
  * @brief Test rejection of non-standard frequencies
- * @requirement SYS-CONST-002: Reject non-AES5-2018 compliant frequencies
- * @traceability TEST-C-004-003 → DES-C-004 → SYS-CONST-002
+ * @requirements REQ-F-002, REQ-NF-C-003
+ * @design DES-C-004
+ * @traceability TEST-COMP-003 → DES-C-004 → REQ-F-002, REQ-NF-C-003
+ * 
+ * Verifies rejection of non-AES5-2018 compliant frequencies.
  */
 TEST_F(ComplianceEngineTest, RejectNonStandardFrequencies) {
     // Given: Non-standard frequencies not in AES5-2018
