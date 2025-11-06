@@ -1,4 +1,5 @@
 ---
+specType: component
 component_id: ARC-C-010
 title: "Error Handling and Reliability Component"
 version: "1.0.0"

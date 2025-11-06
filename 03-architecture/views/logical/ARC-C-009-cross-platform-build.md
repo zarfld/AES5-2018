@@ -1,4 +1,5 @@
 ---
+specType: component
 component_id: ARC-C-009
 title: "Cross-Platform Build System Component"
 version: "1.0.0"

@@ -1,4 +1,5 @@
 ---
+specType: component
 component_id: ARC-C-011
 title: "Documentation and Examples Component"
 version: "1.0.0"

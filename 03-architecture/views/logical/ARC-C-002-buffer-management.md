@@ -1,4 +1,5 @@
 ---
+specType: component
 component_id: ARC-C-002
 title: "Buffer Management Component"
 version: "1.0.0"

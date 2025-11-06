@@ -1,4 +1,5 @@
 ---
+specType: component
 component_id: ARC-C-001
 title: "Frequency Validation Core Component"
 version: "1.0.0"

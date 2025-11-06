@@ -9,7 +9,108 @@ date: "2025-11-06"
 status: "draft"
 phase: "03-architecture"
 traceability:
-  requirements: ["REQ-F-001", "REQ-F-002", "REQ-F-003", "REQ-NF-001", "REQ-NF-002", "REQ-NF-003"]
+  requirements:
+    # Functional Requirements - Core AES5 Frequency Support
+    - REQ-F-001  # 48 kHz primary frequency processing
+    - REQ-F-002  # 48 kHz frequency validation
+    - REQ-F-003  # 48 kHz buffer management
+    - REQ-F-004  # 44.1 kHz consumer audio support
+    - REQ-F-005  # 32 kHz legacy broadcast support
+    - REQ-F-006  # 96 kHz high-resolution audio support
+    - REQ-F-007  # Double rate frequencies (2× support)
+    - REQ-F-008  # Quadruple rate frequencies (4× support)
+    - REQ-F-009  # Octuple rate frequencies (8× support)
+    - REQ-F-010  # Platform-agnostic core architecture
+    - REQ-F-011  # Hardware interface abstraction
+    - REQ-F-012  # Platform adapter implementation
+    - REQ-F-013  # Sample rate conversion
+    - REQ-F-014  # Anti-aliasing filtering
+    # Non-Functional Requirements - Performance
+    - REQ-NF-P-001  # Real-time latency guarantee
+    - REQ-NF-P-002  # CPU utilization limits
+    - REQ-NF-P-003  # Memory footprint constraints
+    - REQ-NF-P-004  # No FPU requirement
+    - REQ-NF-P-005  # Initialization performance
+    # Non-Functional Requirements - Reliability
+    - REQ-NF-R-001  # Continuous operation reliability
+    - REQ-NF-R-002  # Graceful degradation
+    - REQ-NF-R-003  # Error recovery
+    # Non-Functional Requirements - Usability
+    - REQ-NF-U-001  # Developer integration time
+    - REQ-NF-U-002  # API simplicity
+    - REQ-NF-U-003  # Multi-platform examples
+    # Non-Functional Requirements - Security
+    - REQ-NF-S-001  # Resource exhaustion protection
+    - REQ-NF-S-002  # Secure coding practices
+    # Non-Functional Requirements - Maintainability
+    - REQ-NF-M-001  # Code quality and coverage
+    - REQ-NF-M-002  # Documentation completeness
+    # Non-Functional Requirements - Portability
+    - REQ-NF-PO-001  # Cross-platform compilation
+    - REQ-NF-PO-002  # Standard C++17 compliance
+    # Non-Functional Requirements - Compliance
+    - REQ-NF-C-001  # AES5-2018 standards compliance
+    - REQ-NF-C-002  # Automated compliance testing
+    - REQ-NF-C-003  # Certification documentation support
+    # Interface Requirements
+    - REQ-I-001  # Audio interface abstraction
+    - REQ-I-002  # Timer interface abstraction
+    - REQ-I-003  # Memory interface abstraction
+    - REQ-I-004  # Core library API
+    - REQ-I-005  # Arduino platform interface
+    - REQ-I-006  # POSIX platform interface
+    - REQ-I-007  # Windows platform interface
+    # Design Constraints
+    - REQ-C-001  # Hardware abstraction constraint
+    - REQ-C-002  # Resource constraint compliance
+    - REQ-C-003  # Standards compliance constraint
+    - REQ-C-004  # C++17 standard constraint
+    - REQ-C-005  # Open source licensing constraint
+    # Compliance Test Framework Requirements
+    - REQ-CTF-F-001  # Automated clause coverage testing
+    - REQ-CTF-F-002  # Boundary case simulation
+    - REQ-CTF-F-003  # Cross-platform validation
+    - REQ-CTF-F-004  # Automated test execution
+    - REQ-CTF-F-005  # Compliance reporting
+    - REQ-CTF-F-006  # Audio quality validation
+    - REQ-CTF-F-007  # Performance compliance testing
+    - REQ-CTF-NF-001  # Test execution performance
+    - REQ-CTF-NF-002  # Framework reliability
+    - REQ-CTF-NF-003  # CI/CD integration
+    - REQ-CTF-NF-004  # Developer experience
+    - REQ-CTF-A-001  # Modular test architecture
+    - REQ-CTF-A-002  # Platform abstraction
+    - REQ-CTF-A-003  # Test signal library
+    - REQ-CTF-A-004  # Reference data management
+    - REQ-CTF-I-001  # System under test integration
+    - REQ-CTF-I-002  # Development tool integration
+    - REQ-CTF-V-001  # Framework self-testing
+    - REQ-CTF-V-002  # Third-party validation
+  components:
+    - ARC-C-001  # Frequency Validation Core
+    - ARC-C-002  # Buffer Management
+    - ARC-C-003  # Frequency Conversion
+    - ARC-C-004  # Hardware Abstraction Layer
+    - ARC-C-005  # Platform Adapters
+    - ARC-C-006  # Compliance Test Framework
+    - ARC-C-007  # Core Library API
+    - ARC-C-008  # Performance Monitoring
+    - ARC-C-009  # Cross-Platform Build System
+    - ARC-C-010  # Error Handling and Reliability
+    - ARC-C-011  # Documentation and Examples
+  adrs:
+    - ADR-001  # Layered architecture with dependency injection
+    - ADR-002  # Static memory allocation strategy
+    - ADR-003  # C++17 implementation with C API bindings
+    - ADR-004  # CMake build system with platform detection
+  quality_scenarios:
+    - QA-SC-001  # Performance - API latency
+    - QA-SC-002  # Availability - Database failure
+    - QA-SC-003  # Security - Credential stuffing
+    - QA-SC-010  # Portability - Cross-platform compilation
+    - QA-SC-011  # Maintainability - Code quality
+    - QA-SC-012  # Usability - API simplicity
+    - QA-SC-013  # Compliance - AES5-2018 certification
 standards_compliance: ["ISO/IEC/IEEE-42010:2011", "AES5-2018"]
 architectural_style: "Layered Architecture with Dependency Injection"
 priority: "critical"

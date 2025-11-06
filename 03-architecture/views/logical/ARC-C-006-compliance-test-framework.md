@@ -1,4 +1,5 @@
 ---
+specType: component
 component_id: ARC-C-006
 title: "Compliance Test Framework Component"
 version: "1.0.0"
