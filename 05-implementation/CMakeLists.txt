@@ -155,6 +155,20 @@ add_test(NAME ValidationCoreUnitTests COMMAND validation_core_tests)
 # Register FrequencyValidator tests with CTest
 add_test(NAME FrequencyValidatorUnitTests COMMAND frequency_validator_tests)
 
+# Performance Benchmarks
+add_executable(frequency_validator_benchmark
+    benchmark_frequency_validator.cpp
+)
+
+target_link_libraries(frequency_validator_benchmark PRIVATE
+    aes5_standards
+)
+
+target_include_directories(frequency_validator_benchmark PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${STANDARDS_INCLUDE_DIR}
+)
+
 # Set test properties for better output
 set_tests_properties(ComplianceEngineUnitTests PROPERTIES
     TIMEOUT 30
