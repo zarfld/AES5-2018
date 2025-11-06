@@ -93,7 +93,7 @@ TEST_F(ComplianceEngineTest, VerifyAES5Section5_2_OtherFrequencies) {
  * @requirement SYS-CONST-002: Reject non-AES5-2018 compliant frequencies
  * @traceability TEST-C-004-003 → DES-C-004 → SYS-CONST-002
  */
-TEST_F(ComplianceEngineTest, DISABLED_RejectNonStandardFrequencies) {
+TEST_F(ComplianceEngineTest, RejectNonStandardFrequencies) {
     // Given: Non-standard frequencies not in AES5-2018
     std::vector<std::pair<uint32_t, std::string>> invalid_cases = {
         {47000, "5.1"},   // 47 kHz not primary frequency
@@ -108,13 +108,10 @@ TEST_F(ComplianceEngineTest, DISABLED_RejectNonStandardFrequencies) {
         uint32_t frequency = test_case.first;
         std::string clause = test_case.second;
         
-        // bool is_compliant = engine_->verify_aes5_clause_compliance(frequency, clause);
-        // EXPECT_FALSE(is_compliant) 
-        //     << "Frequency " << frequency << " should NOT be compliant with clause " << clause;
+        bool is_compliant = engine_->verify_aes5_clause_compliance(frequency, clause);
+        EXPECT_FALSE(is_compliant) 
+            << "Frequency " << frequency << " should NOT be compliant with clause " << clause;
     }
-    
-    // RED PHASE: This test is disabled and will be enabled during GREEN phase
-    FAIL() << "RED PHASE: ComplianceEngine not yet implemented";
 }
 
 /**
@@ -122,19 +119,16 @@ TEST_F(ComplianceEngineTest, DISABLED_RejectNonStandardFrequencies) {
  * @requirement SYS-LEGACY-001: Support legacy 32 kHz frequency
  * @traceability TEST-C-004-004 → DES-C-004 → SYS-LEGACY-001
  */
-TEST_F(ComplianceEngineTest, DISABLED_VerifyAES5Section5_4_LegacyFrequency32kHz) {
+TEST_F(ComplianceEngineTest, VerifyAES5Section5_4_LegacyFrequency32kHz) {
     // Given: 32 kHz legacy frequency and AES5-2018 Section 5.4
     uint32_t frequency_hz = 32000;
     std::string aes5_clause = "5.4";
     
     // When: Verifying compliance with AES5-2018 Section 5.4
-    // bool is_compliant = engine_->verify_aes5_clause_compliance(frequency_hz, aes5_clause);
+    bool is_compliant = engine_->verify_aes5_clause_compliance(frequency_hz, aes5_clause);
     
     // Then: Should be compliant (32 kHz allowed as legacy per AES5-2018)
-    // EXPECT_TRUE(is_compliant);
-    
-    // RED PHASE: This test is disabled and will be enabled during GREEN phase
-    FAIL() << "RED PHASE: ComplianceEngine not yet implemented";
+    EXPECT_TRUE(is_compliant);
 }
 
 /**
@@ -142,19 +136,16 @@ TEST_F(ComplianceEngineTest, DISABLED_VerifyAES5Section5_4_LegacyFrequency32kHz)
  * @requirement SYS-ERROR-001: Handle unknown specification clauses gracefully
  * @traceability TEST-C-004-005 → DES-C-004 → SYS-ERROR-001
  */
-TEST_F(ComplianceEngineTest, DISABLED_HandleUnknownClausesGracefully) {
+TEST_F(ComplianceEngineTest, HandleUnknownClausesGracefully) {
     // Given: Valid frequency but unknown clause
     uint32_t frequency_hz = 48000;
     std::string unknown_clause = "9.99";  // Non-existent clause
     
     // When: Verifying compliance with unknown clause
-    // bool is_compliant = engine_->verify_aes5_clause_compliance(frequency_hz, unknown_clause);
+    bool is_compliant = engine_->verify_aes5_clause_compliance(frequency_hz, unknown_clause);
     
     // Then: Should return false (not compliant with unknown clause)
-    // EXPECT_FALSE(is_compliant);
-    
-    // RED PHASE: This test is disabled and will be enabled during GREEN phase
-    FAIL() << "RED PHASE: ComplianceEngine not yet implemented";
+    EXPECT_FALSE(is_compliant);
 }
 
 /**
@@ -162,7 +153,7 @@ TEST_F(ComplianceEngineTest, DISABLED_HandleUnknownClausesGracefully) {
  * @requirement SYS-PERF-001: Real-time performance constraints
  * @traceability TEST-C-004-006 → DES-C-004 → SYS-PERF-001
  */
-TEST_F(ComplianceEngineTest, DISABLED_MeetPerformanceRequirements) {
+TEST_F(ComplianceEngineTest, MeetPerformanceRequirements) {
     // Given: Multiple compliance checks to measure performance
     std::vector<std::pair<uint32_t, std::string>> test_cases = {
         {48000, "5.1"},   // Primary frequency
@@ -177,14 +168,11 @@ TEST_F(ComplianceEngineTest, DISABLED_MeetPerformanceRequirements) {
         uint32_t frequency = test_case.first;
         std::string clause = test_case.second;
         
-        // measure_performance([&]() {
-        //     engine_->verify_aes5_clause_compliance(frequency, clause);
-        // }, "Compliance check for " + std::to_string(frequency) + "Hz, clause " + clause,
-        //    std::chrono::microseconds(10));
+        measure_performance([&]() {
+            engine_->verify_aes5_clause_compliance(frequency, clause);
+        }, "Compliance check for " + std::to_string(frequency) + "Hz, clause " + clause,
+           std::chrono::microseconds(10));
     }
-    
-    // RED PHASE: This test is disabled and will be enabled during GREEN phase
-    FAIL() << "RED PHASE: ComplianceEngine not yet implemented - Performance tests pending";
 }
 
 /**
@@ -192,17 +180,17 @@ TEST_F(ComplianceEngineTest, DISABLED_MeetPerformanceRequirements) {
  * @requirement SYS-MEM-001: Static memory allocation within budget
  * @traceability TEST-C-004-007 → DES-C-004 → SYS-MEM-001
  */
-TEST_F(ComplianceEngineTest, DISABLED_ValidateMemoryFootprint) {
+TEST_F(ComplianceEngineTest, ValidateMemoryFootprint) {
     // When: Creating ComplianceEngine instance
-    // ComplianceEngine engine;
+    ComplianceEngine engine;
     
     // Then: Memory footprint should be minimal (target: <1KB per component)
-    // size_t memory_usage = sizeof(ComplianceEngine);
-    // EXPECT_LE(memory_usage, 1024) << "ComplianceEngine uses " << memory_usage 
-    //                                << " bytes, exceeds 1KB limit";
+    size_t memory_usage = sizeof(ComplianceEngine);
+    EXPECT_LE(memory_usage, 1024) << "ComplianceEngine uses " << memory_usage 
+                                   << " bytes, exceeds 1KB limit";
     
-    // RED PHASE: This test is disabled and will be enabled during GREEN phase
-    FAIL() << "RED PHASE: ComplianceEngine not yet implemented - Memory tests pending";
+    // Also test static method
+    EXPECT_EQ(memory_usage, ComplianceEngine::get_memory_footprint());
 }
 
 // RED PHASE SUMMARY TESTS - Document what we expect to implement

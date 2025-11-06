@@ -1,0 +1,117 @@
+# Simplified CMakeLists.txt for Phase 5 TDD Implementation
+# AES5-2018 Standards-Compliant Audio Processing Library
+# Using minimal testing without external dependencies
+
+cmake_minimum_required(VERSION 3.20)
+project(AES5-2018 VERSION 1.0.0 LANGUAGES CXX)
+
+# Modern C++ standard required for performance and safety
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Build type configuration
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
+# Compiler flags for performance and debugging
+if(MSVC)
+    # Visual Studio flags for Windows development
+    set(CMAKE_CXX_FLAGS_DEBUG "/DEBUG /Od /Zi /MDd")
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /Oi /DNDEBUG /MD")
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+else()
+    # GCC/Clang flags for Linux/macOS development
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
+    
+    # Additional warnings for code quality
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
+
+# Include directories for the project
+set(STANDARDS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/Standards")
+set(PLATFORM_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/lib/Platform")
+set(TESTS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+
+# AES5-2018 Standards Library (Hardware-agnostic implementation)
+add_library(aes5_standards STATIC
+    # Core compliance and validation components (Phase 5.1)
+    src/lib/Standards/AES/AES5/2018/core/compliance/compliance_engine.cpp
+    
+    # Additional components will be added in subsequent TDD cycles:
+    # src/lib/Standards/AES/AES5/2018/core/validation/validation_core.cpp          # DES-C-005
+    # src/lib/Standards/AES/AES5/2018/core/frequency_validation/frequency_validator.cpp  # DES-C-001
+    # src/lib/Standards/AES/AES5/2018/core/rate_categories/rate_category_manager.cpp     # DES-C-003
+    # src/lib/Standards/AES/AES5/2018/conversion/frequency_converter.cpp          # DES-C-002
+)
+
+# Public include directories for standards library
+target_include_directories(aes5_standards PUBLIC
+    ${STANDARDS_INCLUDE_DIR}
+)
+
+# Compiler-specific optimizations for standards library
+target_compile_features(aes5_standards PUBLIC cxx_std_17)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Enable link-time optimization for release builds
+    set_property(TARGET aes5_standards PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+# Simple Test Framework (without external dependencies)
+add_library(simple_test_framework STATIC
+    tests/framework/simple_test_framework.cpp
+)
+
+target_include_directories(simple_test_framework PUBLIC
+    ${STANDARDS_INCLUDE_DIR}
+    ${TESTS_INCLUDE_DIR}
+)
+
+# Simple Test Runner - ComplianceEngine (DES-C-004)
+add_executable(compliance_engine_tests
+    tests/unit/Standards/AES/AES5/2018/core/test_compliance_engine_simple.cpp
+)
+
+target_link_libraries(compliance_engine_tests PRIVATE
+    aes5_standards
+    simple_test_framework
+)
+
+# Custom targets for TDD workflow
+
+# Target: Run tests
+add_custom_target(run_tests
+    COMMAND compliance_engine_tests
+    DEPENDS compliance_engine_tests
+    COMMENT "Running ComplianceEngine TDD tests"
+)
+
+# Target: TDD cycle helper - build and test
+add_custom_target(tdd_cycle
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target compliance_engine_tests
+    COMMAND compliance_engine_tests
+    COMMENT "TDD Cycle: Build and test ComplianceEngine"
+)
+
+# Development convenience targets
+add_custom_target(clean_build
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
+    COMMENT "Clean build all targets"
+)
+
+# Summary information
+message(STATUS "AES5-2018 TDD Build Configuration (Simplified):")
+message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+# TDD Instructions for developers
+message(STATUS "")
+message(STATUS "TDD Workflow Commands:")
+message(STATUS "  Build: cmake --build .")
+message(STATUS "  Test: cmake --build . --target run_tests")
+message(STATUS "  TDD Cycle: cmake --build . --target tdd_cycle")
+message(STATUS "")
