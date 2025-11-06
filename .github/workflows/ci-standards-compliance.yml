@@ -212,9 +212,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: spec-generated-artifacts
-          path: build/
+          path: .
       - name: Debug - List downloaded artifacts
         run: |
+          echo "📋 Contents of current directory:"
+          ls -lah
           echo "📋 Contents of build/ directory:"
           ls -lah build/
           if [ -f build/traceability.json ]; then
