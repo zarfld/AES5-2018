@@ -116,8 +116,6 @@ TEST_F(AES5_2018_ConformityTest, NyquistShannonTheoremCompliance) {
 TEST_F(AES5_2018_ConformityTest, AntiAliasingFilterAttenuationRequirement) {
     // AES5-2018 requires at least 50 dB attenuation above Nyquist frequency
     constexpr double kMinAttenuationDB = 50.0;
-    constexpr uint32_t kSamplingFreq = 48000;
-    constexpr uint32_t kNyquistFreq = kSamplingFreq / 2;
     
     // Implementation should document anti-aliasing filter specifications
     // This test verifies the attenuation constant is at least 50 dB
@@ -426,7 +424,7 @@ TEST_F(AES5_2018_ConformityTest, VeryHighSamplingFrequenciesPowerOfTwoRequiremen
     std::vector<uint32_t> valid_multipliers = {128, 256, 512};  // >100x
     
     for (uint32_t mult : valid_multipliers) {
-        uint32_t very_high_freq = kPrimaryFreq * mult;
+        [[maybe_unused]] uint32_t very_high_freq = kPrimaryFreq * mult;
         
         // Verify multiplier is a power of two
         bool is_power_of_two = (mult & (mult - 1)) == 0;
@@ -675,13 +673,13 @@ TEST_F(AES5_2018_ConformityTest, NonIntegerRatioNTSCVideoSystemSynchronization) 
     // Calculate samples per frame (fractional)
     double samples_per_frame_2997 = kSamplingFreq / kNTSCFrameRate;
     double samples_per_frame_2398 = kSamplingFreq / kNTSCFilmRate;
-    double samples_per_frame_5994 = kSamplingFreq / kNTSCProgressiveRate;
+    [[maybe_unused]] double samples_per_frame_5994 = kSamplingFreq / kNTSCProgressiveRate;
     
     // AES5-2018 Annex A, Table A2 specifies exact values
     // For 48 kHz @ 29.97: 8008/5 = 1601.6 samples per frame
     constexpr double kExpected2997 = 8008.0 / 5.0;
     constexpr double kExpected2398 = 2002.0;
-    constexpr double kExpected5994 = 4004.0 / 5.0;
+    [[maybe_unused]] constexpr double kExpected5994 = 4004.0 / 5.0;
     
     constexpr double kPrecisionTolerance = 0.001;  // High precision required
     
