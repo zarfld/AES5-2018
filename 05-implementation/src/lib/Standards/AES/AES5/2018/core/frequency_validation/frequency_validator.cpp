@@ -208,12 +208,12 @@ static constexpr std::array<FrequencyRange, 11> FREQUENCY_LOOKUP_TABLE = {{
     {46000, 47499,  47952},    // Pull-down range → 47.952 kHz
     {47500, 47899,  47952},    // Close to pull-down → 47.952 kHz
     {47900, 48150,  48000},    // Primary range → 48 kHz (prefer primary, include test case 48100)
-    {48151, 60000,  48048},    // Pull-up range → 48.048 kHz
-    {60001, 92000,  88200},    // Double rate 44.1 kHz → 88.2 kHz
-    {92001, 100000, 96000},    // High bandwidth → 96 kHz
-    {100001, 180000, 176400},  // Quadruple rate 44.1 kHz → 176.4 kHz
-    {180001, 350000, 192000},  // Quadruple rate 48 kHz → 192 kHz
-    {350001, UINT32_MAX, 384000} // Octuple rate 48 kHz → 384 kHz
+    {48151, 68124,  48048},    // Pull-up range → 48.048 kHz (midpoint with 88.2k: (48048+88200)/2=68124)
+    {68125, 92100,  88200},    // Double rate 44.1 kHz → 88.2 kHz (midpoint with 96k: (88200+96000)/2=92100)
+    {92101, 136200, 96000},    // High bandwidth → 96 kHz (midpoint with 176.4k: (96000+176400)/2=136200)
+    {136201, 184200, 176400},  // Quadruple rate 44.1 kHz → 176.4 kHz (midpoint with 192k: (176400+192000)/2=184200)
+    {184201, 288000, 192000},  // Quadruple rate 48 kHz → 192 kHz (midpoint with 384k: (192000+384000)/2=288000)
+    {288001, UINT32_MAX, 384000} // Octuple rate 48 kHz → 384 kHz
 }};
 
 // Fast path for exact standard frequency matches

@@ -294,7 +294,7 @@ TEST_F(FrequencyValidatorTest, ClosestStandardFrequencyFinder) {
         {40000, 44100, "Between 32k and 44.1k -> closer to 44.1k"},
         {46000, 47952, "Between 44.1k and 48k -> closer to pull-down"},
         {48500, 48048, "Between 48k variants -> closer to pull-up"},
-        {70000, 96000, "Between 48k and 96k -> closer to 96k"},
+        {70000, 88200, "Between 48k and 96k -> closer to 88.2k (new double rate)"},
         {100000, 96000, "Above 96k -> closest to 96k"}
     };
     
