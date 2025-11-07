@@ -170,6 +170,42 @@ target_link_libraries(aes5_2018_conformity_tests PRIVATE
     gtest_main
 )
 
+# Unit Tests - AES5-2018 Interface Abstraction Tests (REQ-I-*, REQ-F-011)
+add_executable(aes5_2018_interface_tests
+    tests/test_aes5_2018_interfaces.cpp
+)
+
+target_link_libraries(aes5_2018_interface_tests PRIVATE
+    aes5_standards
+    aes5_test_framework
+    gtest
+    gtest_main
+)
+
+# Unit Tests - AES5-2018 Constraint Validation Tests (REQ-C-*)
+add_executable(aes5_2018_constraint_tests
+    tests/test_aes5_2018_constraints.cpp
+)
+
+target_link_libraries(aes5_2018_constraint_tests PRIVATE
+    aes5_standards
+    aes5_test_framework
+    gtest
+    gtest_main
+)
+
+# Unit Tests - AES5-2018 Architecture Tests (REQ-F-011, REQ-F-012, REQ-F-013)
+add_executable(aes5_2018_architecture_tests
+    tests/test_aes5_2018_architecture.cpp
+)
+
+target_link_libraries(aes5_2018_architecture_tests PRIVATE
+    aes5_standards
+    aes5_test_framework
+    gtest
+    gtest_main
+)
+
 # Register ComplianceEngine tests with CTest
 add_test(NAME ComplianceEngineUnitTests COMMAND compliance_engine_tests)
 
@@ -184,6 +220,15 @@ add_test(NAME RateCategoryManagerUnitTests COMMAND rate_category_manager_tests)
 
 # Register AES5-2018 Conformity tests with CTest
 add_test(NAME AES5_2018_ConformityTests COMMAND aes5_2018_conformity_tests)
+
+# Register AES5-2018 Interface tests with CTest
+add_test(NAME AES5_2018_InterfaceTests COMMAND aes5_2018_interface_tests)
+
+# Register AES5-2018 Constraint tests with CTest
+add_test(NAME AES5_2018_ConstraintTests COMMAND aes5_2018_constraint_tests)
+
+# Register AES5-2018 Architecture tests with CTest
+add_test(NAME AES5_2018_ArchitectureTests COMMAND aes5_2018_architecture_tests)
 
 # Performance Benchmarks
 add_executable(frequency_validator_benchmark
@@ -239,13 +284,28 @@ set_tests_properties(AES5_2018_ConformityTests PROPERTIES
     ENVIRONMENT "GTEST_COLOR=1"
 )
 
+set_tests_properties(AES5_2018_InterfaceTests PROPERTIES
+    TIMEOUT 30
+    ENVIRONMENT "GTEST_COLOR=1"
+)
+
+set_tests_properties(AES5_2018_ConstraintTests PROPERTIES
+    TIMEOUT 30
+    ENVIRONMENT "GTEST_COLOR=1"
+)
+
+set_tests_properties(AES5_2018_ArchitectureTests PROPERTIES
+    TIMEOUT 30
+    ENVIRONMENT "GTEST_COLOR=1"
+)
+
 # Custom targets for TDD workflow
 
 # Target: Run all tests
 add_custom_target(run_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --verbose
-    DEPENDS compliance_engine_tests validation_core_tests frequency_validator_tests rate_category_manager_tests aes5_2018_conformity_tests
-    COMMENT "Running all TDD tests including conformity tests"
+    DEPENDS compliance_engine_tests validation_core_tests frequency_validator_tests rate_category_manager_tests aes5_2018_conformity_tests aes5_2018_interface_tests aes5_2018_constraint_tests aes5_2018_architecture_tests
+    COMMENT "Running all TDD tests including conformity, interface, constraint, and architecture tests"
 )
 
 # Target: Check test coverage (if gcovr is available)
