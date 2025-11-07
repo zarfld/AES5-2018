@@ -490,7 +490,7 @@ TEST_F(AES5ArchitectureTest, CrossPlatformValidationConsistency) {
         // Results must be deterministic
         EXPECT_EQ(result1.is_valid(), result2.is_valid()) 
             << "Frequency: " << freq;
-        EXPECT_EQ(result1.frequency_hz, result2.frequency_hz)
+        EXPECT_EQ(result1.detected_frequency, result2.detected_frequency)
             << "Frequency: " << freq;
         EXPECT_EQ(result1.applicable_clause, result2.applicable_clause)
             << "Frequency: " << freq;
