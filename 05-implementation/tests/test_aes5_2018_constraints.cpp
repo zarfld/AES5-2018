@@ -13,8 +13,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "lib/Standards/AES/AES5/2018/core/frequency_validation/frequency_validator.h"
-#include "lib/Standards/AES/AES5/2018/core/rate_categories/rate_category_manager.h"
+#include "AES/AES5/2018/core/frequency_validation/frequency_validator.hpp"
+#include "AES/AES5/2018/core/rate_categories/rate_category_manager.hpp"
 #include <type_traits>
 #include <string>
 #include <cstdint>

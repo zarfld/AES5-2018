@@ -14,7 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "aes5_2018.h"
+#include "AES/AES5/2018/core/frequency_validation/frequency_validator.hpp"
+#include "AES/AES5/2018/core/rate_categories/rate_category_manager.hpp"
 #include <memory>
 #include <vector>
 #include <cmath>
