@@ -202,19 +202,23 @@ struct FrequencyRange {
     uint32_t standard_freq;
 };
 
-static constexpr std::array<FrequencyRange, 7> FREQUENCY_LOOKUP_TABLE = {{
-    {0,     38050,  32000},   // Legacy range → 32 kHz
-    {38051, 45999,  44100},   // Consumer range → 44.1 kHz  
-    {46000, 47499,  47952},   // Pull-down range → 47.952 kHz
-    {47500, 47899,  47952},   // Close to pull-down → 47.952 kHz
-    {47900, 48150,  48000},   // Primary range → 48 kHz (prefer primary, include test case 48100)
-    {48151, 60000,  48048},   // Pull-up range → 48.048 kHz
-    {60001, UINT32_MAX, 96000} // High bandwidth → 96 kHz
+static constexpr std::array<FrequencyRange, 11> FREQUENCY_LOOKUP_TABLE = {{
+    {0,     38050,  32000},    // Legacy range → 32 kHz
+    {38051, 45999,  44100},    // Consumer range → 44.1 kHz  
+    {46000, 47499,  47952},    // Pull-down range → 47.952 kHz
+    {47500, 47899,  47952},    // Close to pull-down → 47.952 kHz
+    {47900, 48150,  48000},    // Primary range → 48 kHz (prefer primary, include test case 48100)
+    {48151, 60000,  48048},    // Pull-up range → 48.048 kHz
+    {60001, 92000,  88200},    // Double rate 44.1 kHz → 88.2 kHz
+    {92001, 100000, 96000},    // High bandwidth → 96 kHz
+    {100001, 180000, 176400},  // Quadruple rate 44.1 kHz → 176.4 kHz
+    {180001, 350000, 192000},  // Quadruple rate 48 kHz → 192 kHz
+    {350001, UINT32_MAX, 384000} // Octuple rate 48 kHz → 384 kHz
 }};
 
 // Fast path for exact standard frequency matches
-static constexpr std::array<uint32_t, 6> EXACT_STANDARDS = {
-    32000, 44100, 47952, 48000, 48048, 96000
+static constexpr std::array<uint32_t, 10> EXACT_STANDARDS = {
+    32000, 44100, 47952, 48000, 48048, 88200, 96000, 176400, 192000, 384000
 };
 
 // Find closest standard frequency
@@ -264,10 +268,12 @@ struct ToleranceLookup {
 };
 
 // Common tolerance calculations precomputed (most frequent validation scenarios)
-static constexpr std::array<ToleranceLookup, 12> PPM_LOOKUP_TABLE = {{
+static constexpr std::array<ToleranceLookup, 16> PPM_LOOKUP_TABLE = {{
     // Exact matches (0 PPM)
     {32000, 32000, 0},     {44100, 44100, 0},     {47952, 47952, 0},
-    {48000, 48000, 0},     {48048, 48048, 0},     {96000, 96000, 0},
+    {48000, 48000, 0},     {48048, 48048, 0},     {88200, 88200, 0},
+    {96000, 96000, 0},     {176400, 176400, 0},   {192000, 192000, 0},
+    {384000, 384000, 0},
     
     // Common test scenarios 
     {47999, 48000, 20},    // 47999 vs 48000: ~20.83 PPM
