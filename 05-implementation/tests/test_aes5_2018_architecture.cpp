@@ -16,9 +16,13 @@
 #include <gtest/gtest.h>
 #include "AES/AES5/2018/core/frequency_validation/frequency_validator.hpp"
 #include "AES/AES5/2018/core/rate_categories/rate_category_manager.hpp"
+#include "AES/AES5/2018/core/compliance/compliance_engine.hpp"
+#include "AES/AES5/2018/core/validation/validation_core.hpp"
 #include <memory>
 #include <vector>
 #include <cmath>
+
+using namespace AES::AES5::_2018::core;
 
 // ============================================================================
 // Test Fixture
@@ -26,12 +30,20 @@
 
 class AES5ArchitectureTest : public ::testing::Test {
 protected:
+    std::unique_ptr<frequency_validation::FrequencyValidator> validator;
+    
     void SetUp() override {
-        // Setup for architecture tests
+        // Create validator with compliance and validation engines
+        auto compliance_engine = std::make_unique<compliance::ComplianceEngine>();
+        auto validation_core = std::make_unique<validation::ValidationCore>();
+        validator = frequency_validation::FrequencyValidator::create(
+            std::move(compliance_engine),
+            std::move(validation_core)
+        );
     }
     
     void TearDown() override {
-        // Cleanup
+        validator.reset();
     }
 };
 
@@ -48,20 +60,20 @@ protected:
  */
 TEST_F(AES5ArchitectureTest, HardwareInterfaceAbstraction) {
     // Core validation works without hardware interfaces
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid()());
     
     // No direct hardware access required for validation
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid()());
     
     // Interface abstraction allows testing without hardware
-    result = aes5_validate_frequency(96000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(96000);
+    EXPECT_TRUE(result.is_valid()());
     
     // Invalid frequency detection works without hardware
-    result = aes5_validate_frequency(12345);
-    EXPECT_FALSE(result.is_valid);
+    result = validator->validate_frequency(12345);
+    EXPECT_FALSE(result.is_valid()());
 }
 
 /**
@@ -89,8 +101,8 @@ TEST_F(AES5ArchitectureTest, RuntimeInterfaceInjection) {
     EXPECT_EQ(mock.sample_rate, 96000u);
     
     // Validation works with mocked interface
-    auto result = aes5_validate_frequency(mock.sample_rate);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(mock.sample_rate);
+    EXPECT_TRUE(result.is_valid()());
 }
 
 /**
@@ -122,8 +134,8 @@ TEST_F(AES5ArchitectureTest, MockImplementationSupport) {
     
     // Validate using mock data
     for (auto rate : mock.supported_rates) {
-        auto result = aes5_validate_frequency(rate);
-        EXPECT_TRUE(result.is_valid) << "Rate: " << rate;
+        auto result = validator->validate_frequency(rate);
+        EXPECT_TRUE(result.is_valid()) << "Rate: " << rate;
     }
 }
 
@@ -166,6 +178,19 @@ TEST_F(AES5ArchitectureTest, InterfaceSegregationPrinciple) {
 // Platform Adapter Tests (REQ-F-012)
 // ============================================================================
 
+// Arduino platform adapter simulation (used by TEST-ARCH-005)
+struct ArduinoPlatform {
+    static constexpr bool has_fpu = false;
+    static constexpr size_t max_ram_bytes = 32 * 1024;
+    std::vector<uint32_t> supported_rates = {32000, 44100, 48000};
+    
+    bool supports_frequency(uint32_t freq) const {
+        return std::find(supported_rates.begin(),
+                       supported_rates.end(),
+                       freq) != supported_rates.end();
+    }
+};
+
 /**
  * @test TEST-ARCH-005: Platform Adapter Pattern
  * @requirements REQ-F-012
@@ -175,26 +200,14 @@ TEST_F(AES5ArchitectureTest, InterfaceSegregationPrinciple) {
  */
 TEST_F(AES5ArchitectureTest, PlatformAdapterPattern) {
     // Arduino platform adapter simulation
-    struct ArduinoPlatform {
-        static constexpr bool has_fpu = false;
-        static constexpr size_t max_ram_bytes = 32 * 1024;
-        std::vector<uint32_t> supported_rates = {32000, 44100, 48000};
-        
-        bool supports_frequency(uint32_t freq) const {
-            return std::find(supported_rates.begin(),
-                           supported_rates.end(),
-                           freq) != supported_rates.end();
-        }
-    };
-    
     ArduinoPlatform arduino;
     EXPECT_FALSE(ArduinoPlatform::has_fpu);
     EXPECT_LE(ArduinoPlatform::max_ram_bytes, 32768u);
     
     // Validate supported frequencies
     for (auto rate : arduino.supported_rates) {
-        auto result = aes5_validate_frequency(rate);
-        EXPECT_TRUE(result.is_valid) << "Arduino rate: " << rate;
+        auto result = validator->validate_frequency(rate);
+        EXPECT_TRUE(result.is_valid()) << "Arduino rate: " << rate;
     }
 }
 
@@ -222,8 +235,8 @@ TEST_F(AES5ArchitectureTest, MultiPlatformAdapterSupport) {
     // Each platform validates its supported frequencies
     for (const auto& platform : platforms) {
         for (auto rate : platform.supported_rates) {
-            auto result = aes5_validate_frequency(rate);
-            EXPECT_TRUE(result.is_valid) 
+            auto result = validator->validate_frequency(rate);
+            EXPECT_TRUE(result.is_valid()) 
                 << platform.name << " rate: " << rate;
         }
     }
@@ -287,12 +300,12 @@ TEST_F(AES5ArchitectureTest, SampleRateConversionSupport) {
     
     // Validate source and target frequencies
     for (const auto& conv : conversions) {
-        auto source_result = aes5_validate_frequency(conv.source_rate);
-        auto target_result = aes5_validate_frequency(conv.target_rate);
+        auto source_result = validator->validate_frequency(conv.source_rate);
+        auto target_result = validator->validate_frequency(conv.target_rate);
         
-        EXPECT_TRUE(source_result.is_valid) 
+        EXPECT_TRUE(source_result.is_valid()) 
             << "Source rate: " << conv.source_rate;
-        EXPECT_TRUE(target_result.is_valid) 
+        EXPECT_TRUE(target_result.is_valid()) 
             << "Target rate: " << conv.target_rate;
         
         // Verify conversion ratio is correct
@@ -326,8 +339,8 @@ TEST_F(AES5ArchitectureTest, AntiAliasingFilterRequirements) {
     
     for (const auto& filter : filters) {
         // Validate sample rate
-        auto result = aes5_validate_frequency(filter.sample_rate);
-        EXPECT_TRUE(result.is_valid) << "Rate: " << filter.sample_rate;
+        auto result = validator->validate_frequency(filter.sample_rate);
+        EXPECT_TRUE(result.is_valid()) << "Rate: " << filter.sample_rate;
         
         // Verify Nyquist frequency
         uint32_t nyquist = filter.sample_rate / 2;
@@ -365,11 +378,11 @@ TEST_F(AES5ArchitectureTest, ConversionLatencyBudget) {
     
     for (const auto& latency : latencies) {
         // Validate frequencies
-        auto source = aes5_validate_frequency(latency.source_rate);
-        auto target = aes5_validate_frequency(latency.target_rate);
+        auto source = validator->validate_frequency(latency.source_rate);
+        auto target = validator->validate_frequency(latency.target_rate);
         
-        EXPECT_TRUE(source.is_valid);
-        EXPECT_TRUE(target.is_valid);
+        EXPECT_TRUE(source.is_valid());
+        EXPECT_TRUE(target.is_valid());
         
         // Verify latency budget
         EXPECT_LE(latency.max_latency_ms, 5.0);
@@ -407,11 +420,11 @@ TEST_F(AES5ArchitectureTest, ConversionQualityTarget) {
     
     for (const auto& quality : qualities) {
         // Validate frequencies
-        auto source = aes5_validate_frequency(quality.source_rate);
-        auto target = aes5_validate_frequency(quality.target_rate);
+        auto source = validator->validate_frequency(quality.source_rate);
+        auto target = validator->validate_frequency(quality.target_rate);
         
-        EXPECT_TRUE(source.is_valid);
-        EXPECT_TRUE(target.is_valid);
+        EXPECT_TRUE(source.is_valid());
+        EXPECT_TRUE(target.is_valid());
         
         // Verify SNR target
         EXPECT_GE(quality.target_snr_db, MIN_SNR_DB);
@@ -471,11 +484,11 @@ TEST_F(AES5ArchitectureTest, CrossPlatformValidationConsistency) {
     
     // All platforms should validate identically
     for (auto freq : test_frequencies) {
-        auto result1 = aes5_validate_frequency(freq);
-        auto result2 = aes5_validate_frequency(freq);
+        auto result1 = validator->validate_frequency(freq);
+        auto result2 = validator->validate_frequency(freq);
         
         // Results must be deterministic
-        EXPECT_EQ(result1.is_valid, result2.is_valid) 
+        EXPECT_EQ(result1.is_valid(), result2.is_valid()) 
             << "Frequency: " << freq;
         EXPECT_EQ(result1.frequency_hz, result2.frequency_hz)
             << "Frequency: " << freq;
@@ -527,8 +540,8 @@ TEST_F(AES5ArchitectureTest, AdapterInterfaceCompatibility) {
     EXPECT_TRUE(adapter2->initialize());
     
     // Validate using validated AES5 frequencies
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     EXPECT_TRUE(adapter1->supports_frequency(48000));
     EXPECT_TRUE(adapter2->supports_frequency(48000));
 }
@@ -559,11 +572,11 @@ TEST_F(AES5ArchitectureTest, ConversionRatioValidation) {
     
     for (const auto& ratio : ratios) {
         // Both frequencies must be valid AES5 frequencies
-        auto source = aes5_validate_frequency(ratio.source);
-        auto target = aes5_validate_frequency(ratio.target);
+        auto source = validator->validate_frequency(ratio.source);
+        auto target = validator->validate_frequency(ratio.target);
         
-        EXPECT_TRUE(source.is_valid) << "Source: " << ratio.source;
-        EXPECT_TRUE(target.is_valid) << "Target: " << ratio.target;
+        EXPECT_TRUE(source.is_valid()) << "Source: " << ratio.source;
+        EXPECT_TRUE(target.is_valid()) << "Target: " << ratio.target;
         
         // Calculate actual ratio
         double actual_ratio = static_cast<double>(ratio.target) / 

@@ -15,9 +15,13 @@
 #include <gtest/gtest.h>
 #include "AES/AES5/2018/core/frequency_validation/frequency_validator.hpp"
 #include "AES/AES5/2018/core/rate_categories/rate_category_manager.hpp"
+#include "AES/AES5/2018/core/compliance/compliance_engine.hpp"
+#include "AES/AES5/2018/core/validation/validation_core.hpp"
 #include <type_traits>
 #include <string>
 #include <cstdint>
+
+using namespace AES::AES5::_2018::core;
 
 // ============================================================================
 // Constraint Validation Test Fixture
@@ -25,12 +29,20 @@
 
 class AES5ConstraintTest : public ::testing::Test {
 protected:
+    std::unique_ptr<frequency_validation::FrequencyValidator> validator;
+    
     void SetUp() override {
-        // Setup for constraint tests
+        // Create validator with compliance and validation engines
+        auto compliance_engine = std::make_unique<compliance::ComplianceEngine>();
+        auto validation_core = std::make_unique<validation::ValidationCore>();
+        validator = frequency_validation::FrequencyValidator::create(
+            std::move(compliance_engine),
+            std::move(validation_core)
+        );
     }
     
     void TearDown() override {
-        // Cleanup
+        validator.reset();
     }
 };
 
@@ -47,23 +59,23 @@ protected:
  */
 TEST_F(AES5ConstraintTest, HardwareAbstractionConstraint) {
     // Core validation function has no hardware dependencies
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // Test works without any hardware initialization
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
     
-    result = aes5_validate_frequency(96000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(96000);
+    EXPECT_TRUE(result.is_valid());
     
     // Invalid frequencies detected without hardware
-    result = aes5_validate_frequency(12345);
-    EXPECT_FALSE(result.is_valid);
+    result = validator->validate_frequency(12345);
+    EXPECT_FALSE(result.is_valid());
     
     // All operations are pure logic - no hardware I/O
-    result = aes5_validate_frequency(32000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(32000);
+    EXPECT_TRUE(result.is_valid());
 }
 
 /**
@@ -77,11 +89,11 @@ TEST_F(AES5ConstraintTest, NoPlatformHeadersInCore) {
     // If this test compiles, it proves core has no platform dependencies
     // Core library functions are accessible without platform setup
     
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // Type safety - using standard C++ types only
-    static_assert(std::is_same_v<decltype(result.is_valid), bool>);
+    static_assert(std::is_same_v<decltype(result.is_valid()), bool>);
     static_assert(std::is_same_v<decltype(result.frequency_hz), uint32_t>);
     
     // No platform-specific types (Windows DWORD, Linux uint32, etc.)
@@ -97,17 +109,17 @@ TEST_F(AES5ConstraintTest, NoPlatformHeadersInCore) {
  */
 TEST_F(AES5ConstraintTest, InterfaceOnlyHardwareAccess) {
     // Core validation doesn't require hardware interfaces
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // Validation is pure computation
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
     
     // Multiple calls give consistent results (no hardware state)
-    auto result1 = aes5_validate_frequency(96000);
-    auto result2 = aes5_validate_frequency(96000);
-    EXPECT_EQ(result1.is_valid, result2.is_valid);
+    auto result1 = validator->validate_frequency(96000);
+    auto result2 = validator->validate_frequency(96000);
+    EXPECT_EQ(result1.is_valid(), result2.is_valid());
     EXPECT_EQ(result1.frequency_hz, result2.frequency_hz);
     EXPECT_EQ(result1.applicable_clause, result2.applicable_clause);
 }
@@ -125,15 +137,15 @@ TEST_F(AES5ConstraintTest, InterfaceOnlyHardwareAccess) {
  */
 TEST_F(AES5ConstraintTest, MemoryFootprintValidation) {
     // Validation result structure is small
-    auto result = aes5_validate_frequency(48000);
+    auto result = validator->validate_frequency(48000);
     
     // Result structure should be minimal (few bytes)
     EXPECT_LT(sizeof(result), 256u); // Much less than 256 bytes
     
     // No heap allocations for basic validation
     for (int i = 0; i < 1000; ++i) {
-        result = aes5_validate_frequency(48000);
-        EXPECT_TRUE(result.is_valid);
+        result = validator->validate_frequency(48000);
+        EXPECT_TRUE(result.is_valid());
     }
     
     // Validation is stack-only, no heap required
@@ -150,8 +162,8 @@ TEST_F(AES5ConstraintTest, MemoryFootprintValidation) {
 TEST_F(AES5ConstraintTest, NoFloatingPointDependency) {
     // Frequency validation uses integer values
     uint32_t freq = 48000;
-    auto result = aes5_validate_frequency(freq);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(freq);
+    EXPECT_TRUE(result.is_valid());
     
     // Result contains integer frequency
     EXPECT_EQ(result.frequency_hz, freq);
@@ -166,8 +178,8 @@ TEST_F(AES5ConstraintTest, NoFloatingPointDependency) {
     };
     
     for (auto f : frequencies) {
-        result = aes5_validate_frequency(f);
-        EXPECT_TRUE(result.is_valid) << "Frequency: " << f;
+        result = validator->validate_frequency(f);
+        EXPECT_TRUE(result.is_valid()) << "Frequency: " << f;
     }
 }
 
@@ -182,18 +194,18 @@ TEST_F(AES5ConstraintTest, CodeSizeConstraint) {
     // Core validation function should be compact
     // Testing that it compiles and links proves code size is reasonable
     
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // Multiple frequency checks don't explode code size
-    result = aes5_validate_frequency(32000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(32000);
+    EXPECT_TRUE(result.is_valid());
     
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
     
-    result = aes5_validate_frequency(96000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(96000);
+    EXPECT_TRUE(result.is_valid());
     
     // If this test links, code size is acceptable
     // Actual measurement done in build system
@@ -212,16 +224,16 @@ TEST_F(AES5ConstraintTest, CodeSizeConstraint) {
  */
 TEST_F(AES5ConstraintTest, NoCopyrightViolation) {
     // Implementation references clauses by number
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     EXPECT_EQ(result.applicable_clause, "5.1"); // Clause reference, not text
     
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
     EXPECT_EQ(result.applicable_clause, "5.2"); // Clause reference only
     
-    result = aes5_validate_frequency(96000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(96000);
+    EXPECT_TRUE(result.is_valid());
     EXPECT_EQ(result.applicable_clause, "5.2"); // Clause reference only
     
     // References are identifiers, not copyrighted content
@@ -237,22 +249,22 @@ TEST_F(AES5ConstraintTest, NoCopyrightViolation) {
  */
 TEST_F(AES5ConstraintTest, AES5ClauseMapping) {
     // Primary frequency maps to Clause 5.1
-    auto result = aes5_validate_frequency(48000);
+    auto result = validator->validate_frequency(48000);
     EXPECT_EQ(result.applicable_clause, "5.1");
     
     // Standard frequencies map to Clause 5.2
-    result = aes5_validate_frequency(44100);
+    result = validator->validate_frequency(44100);
     EXPECT_EQ(result.applicable_clause, "5.2");
     
-    result = aes5_validate_frequency(96000);
+    result = validator->validate_frequency(96000);
     EXPECT_EQ(result.applicable_clause, "5.2");
     
     // Legacy frequencies map to Clause 5.4
-    result = aes5_validate_frequency(32000);
+    result = validator->validate_frequency(32000);
     EXPECT_EQ(result.applicable_clause, "5.4");
     
     // Rate multiples map to Clause 5.3
-    result = aes5_validate_frequency(192000); // 4× 48 kHz
+    result = validator->validate_frequency(192000); // 4× 48 kHz
     EXPECT_EQ(result.applicable_clause, "5.3");
 }
 
@@ -272,8 +284,8 @@ TEST_F(AES5ConstraintTest, CPP17StandardCompliance) {
     static_assert(__cplusplus >= 201703L, "Requires C++17 or later");
     
     // Use C++17 structured bindings would work (if validation returned pair)
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // Use C++17 std::string_view for clause references (efficient)
     std::string clause = result.applicable_clause;
@@ -292,11 +304,11 @@ TEST_F(AES5ConstraintTest, CPP17StandardCompliance) {
 TEST_F(AES5ConstraintTest, PortableIntegerTypes) {
     // Frequency uses standard uint32_t
     uint32_t freq = 48000;
-    auto result = aes5_validate_frequency(freq);
+    auto result = validator->validate_frequency(freq);
     
     // Result uses standard types
     static_assert(std::is_same_v<decltype(result.frequency_hz), uint32_t>);
-    static_assert(std::is_same_v<decltype(result.is_valid), bool>);
+    static_assert(std::is_same_v<decltype(result.is_valid()), bool>);
     
     // No platform-specific types like:
     // - Windows: DWORD, UINT, BOOL
@@ -304,7 +316,7 @@ TEST_F(AES5ConstraintTest, PortableIntegerTypes) {
     // - Arduino: word, byte
     
     // Only C++ standard types used
-    EXPECT_TRUE(result.is_valid);
+    EXPECT_TRUE(result.is_valid());
 }
 
 /**
@@ -315,8 +327,8 @@ TEST_F(AES5ConstraintTest, PortableIntegerTypes) {
  */
 TEST_F(AES5ConstraintTest, NoCompilerExtensions) {
     // Standard validation call
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // No use of:
     // - GCC __attribute__
@@ -325,8 +337,8 @@ TEST_F(AES5ConstraintTest, NoCompilerExtensions) {
     // - Compiler-specific pragmas
     
     // Pure standard C++17
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
     
     // If compiles with -std=c++17 -pedantic-errors, we're good
 }
@@ -347,20 +359,20 @@ TEST_F(AES5ConstraintTest, OpenSourceLicenseCompliance) {
     // This test documents the requirement
     
     // Code is usable without license restrictions
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // No proprietary dependencies
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
     
     // Educational use is permitted
-    result = aes5_validate_frequency(96000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(96000);
+    EXPECT_TRUE(result.is_valid());
     
     // Commercial use is permitted
-    result = aes5_validate_frequency(32000);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(32000);
+    EXPECT_TRUE(result.is_valid());
     
     // License file must exist: LICENSE or LICENSE.md
     // Verification done in repository checks
@@ -377,8 +389,8 @@ TEST_F(AES5ConstraintTest, NoProprietaryDependencies) {
     // - C++ standard library (open, standard)
     // - GoogleTest for testing (open source, BSD-3)
     
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // No dependencies on:
     // - Proprietary audio libraries
@@ -386,8 +398,8 @@ TEST_F(AES5ConstraintTest, NoProprietaryDependencies) {
     // - Vendor-specific frameworks
     
     // Implementation is fully open and auditable
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
 }
 
 /**
@@ -399,8 +411,8 @@ TEST_F(AES5ConstraintTest, NoProprietaryDependencies) {
 TEST_F(AES5ConstraintTest, BroadCompilerCompatibility) {
     // If this test compiles and runs, compiler compatibility is proven
     
-    auto result = aes5_validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid);
+    auto result = validator->validate_frequency(48000);
+    EXPECT_TRUE(result.is_valid());
     
     // Tested compilers:
     // - GCC 7+ (Linux, Windows MinGW)
@@ -409,8 +421,8 @@ TEST_F(AES5ConstraintTest, BroadCompilerCompatibility) {
     // - Arduino GCC (embedded)
     
     // No compiler-specific code paths
-    result = aes5_validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid);
+    result = validator->validate_frequency(44100);
+    EXPECT_TRUE(result.is_valid());
 }
 
 /**
@@ -424,20 +436,20 @@ TEST_F(AES5ConstraintTest, CrossPlatformValidation) {
     // Validation is deterministic across platforms
     
     // Test primary frequency
-    auto result1 = aes5_validate_frequency(48000);
-    auto result2 = aes5_validate_frequency(48000);
-    EXPECT_EQ(result1.is_valid, result2.is_valid);
+    auto result1 = validator->validate_frequency(48000);
+    auto result2 = validator->validate_frequency(48000);
+    EXPECT_EQ(result1.is_valid(), result2.is_valid());
     EXPECT_EQ(result1.frequency_hz, result2.frequency_hz);
     EXPECT_EQ(result1.applicable_clause, result2.applicable_clause);
     
     // Same results on Linux, Windows, macOS, Arduino
-    result1 = aes5_validate_frequency(44100);
-    result2 = aes5_validate_frequency(44100);
-    EXPECT_EQ(result1.is_valid, result2.is_valid);
+    result1 = validator->validate_frequency(44100);
+    result2 = validator->validate_frequency(44100);
+    EXPECT_EQ(result1.is_valid(), result2.is_valid());
     
     // Invalid frequencies detected consistently
-    result1 = aes5_validate_frequency(12345);
-    result2 = aes5_validate_frequency(12345);
-    EXPECT_EQ(result1.is_valid, result2.is_valid);
-    EXPECT_FALSE(result1.is_valid);
+    result1 = validator->validate_frequency(12345);
+    result2 = validator->validate_frequency(12345);
+    EXPECT_EQ(result1.is_valid(), result2.is_valid());
+    EXPECT_FALSE(result1.is_valid());
 }
