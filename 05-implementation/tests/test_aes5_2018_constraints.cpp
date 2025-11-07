@@ -22,6 +22,7 @@
 #include <cstdint>
 
 using namespace AES::AES5::_2018::core;
+using AES::AES5::_2018::core::compliance::AES5Clause;
 
 // ============================================================================
 // Constraint Validation Test Fixture
