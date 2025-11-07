@@ -1,7 +1,7 @@
 # AES5-2018 Implementation
 
-[![CI/CD](https://github.com/zarfld/AES5-2018/actions/workflows/ci.yml/badge.svg)](https://github.com/zarfld/AES5-2018/actions)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI/CD](https://github.com/zarfld/AES5-2018/actions/workflows/ci-standards-compliance.yml/badge.svg)](https://github.com/zarfld/AES5-2018/actions)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](#-license)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Standards](https://img.shields.io/badge/Standards-IEEE%2FISO%2FIEC-green.svg)](docs/lifecycle-guide.md)
 
