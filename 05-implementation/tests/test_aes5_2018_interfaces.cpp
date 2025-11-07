@@ -371,6 +371,49 @@ TEST_F(AES5InterfaceTest, MockImplementationSupport) {
     EXPECT_EQ(mock_memory->get_usage(), 0u);
 }
 
+// ============================================================================
+// Test Constants for API and Platform Requirements
+// ============================================================================
+
+// Minimal Core API definition (used by TEST-INTF-007)
+struct MinimalCoreAPI {
+    // Essential functions only (max 10)
+    static constexpr int MAX_API_FUNCTIONS = 10;
+    
+    // Example essential functions for AES5 library:
+    // 1. init()
+    // 2. validate_frequency()
+    // 3. process_audio()
+    // 4. convert_frequency()
+    // 5. get_compliance_status()
+    // 6. set_configuration()
+    // 7. get_supported_rates()
+    // 8. cleanup()
+    
+    static constexpr int CURRENT_API_COUNT = 8;
+};
+
+// Arduino platform constraints (used by TEST-INTF-008)
+struct ArduinoConstraints {
+    static constexpr size_t max_ram_kb = 32;
+    static constexpr size_t max_code_kb = 64;
+    static constexpr bool has_fpu = false;
+};
+
+// POSIX platform features (used by TEST-INTF-008)
+struct POSIXFeatures {
+    static constexpr bool has_threads = true;
+    static constexpr bool has_high_res_timer = true;
+    static constexpr bool has_audio_api = true; // ALSA/CoreAudio
+};
+
+// Windows platform features (used by TEST-INTF-008)
+struct WindowsFeatures {
+    static constexpr bool has_wasapi = true;
+    static constexpr bool has_threads = true;
+    static constexpr int min_version = 10; // Windows 10+
+};
+
 /**
  * @test TEST-INTF-007: Core Library API Simplicity
  * @requirements REQ-I-004, REQ-NF-U-002
@@ -381,23 +424,6 @@ TEST_F(AES5InterfaceTest, MockImplementationSupport) {
 TEST_F(AES5InterfaceTest, CoreLibraryAPISimplicity) {
     // Core API should have minimal, essential functions (≤10)
     // This is verified at design/architecture review level
-    
-    struct MinimalCoreAPI {
-        // Essential functions only (max 10)
-        static constexpr int MAX_API_FUNCTIONS = 10;
-        
-        // Example essential functions for AES5 library:
-        // 1. init()
-        // 2. validate_frequency()
-        // 3. process_audio()
-        // 4. convert_frequency()
-        // 5. get_compliance_status()
-        // 6. set_configuration()
-        // 7. get_supported_rates()
-        // 8. cleanup()
-        
-        static constexpr int CURRENT_API_COUNT = 8;
-    };
     
     // Verify API is within limit
     EXPECT_LE(MinimalCoreAPI::CURRENT_API_COUNT, MinimalCoreAPI::MAX_API_FUNCTIONS);
@@ -417,34 +443,16 @@ TEST_F(AES5InterfaceTest, PlatformInterfaceRequirements) {
     // Platform adapters must implement standard interfaces
     
     // Arduino platform constraints (REQ-I-005)
-    struct ArduinoConstraints {
-        static constexpr size_t max_ram_kb = 32;
-        static constexpr size_t max_code_kb = 64;
-        static constexpr bool has_fpu = false;
-    };
-    
     EXPECT_LE(ArduinoConstraints::max_ram_kb, 32u);
     EXPECT_LE(ArduinoConstraints::max_code_kb, 64u);
     EXPECT_FALSE(ArduinoConstraints::has_fpu);
     
     // POSIX platform features (REQ-I-006)
-    struct POSIXFeatures {
-        static constexpr bool has_threads = true;
-        static constexpr bool has_high_res_timer = true;
-        static constexpr bool has_audio_api = true; // ALSA/CoreAudio
-    };
-    
     EXPECT_TRUE(POSIXFeatures::has_threads);
     EXPECT_TRUE(POSIXFeatures::has_high_res_timer);
     EXPECT_TRUE(POSIXFeatures::has_audio_api);
     
     // Windows platform features (REQ-I-007)
-    struct WindowsFeatures {
-        static constexpr bool has_wasapi = true;
-        static constexpr bool has_threads = true;
-        static constexpr int min_version = 10; // Windows 10+
-    };
-    
     EXPECT_TRUE(WindowsFeatures::has_wasapi);
     EXPECT_TRUE(WindowsFeatures::has_threads);
     EXPECT_GE(WindowsFeatures::min_version, 10);
