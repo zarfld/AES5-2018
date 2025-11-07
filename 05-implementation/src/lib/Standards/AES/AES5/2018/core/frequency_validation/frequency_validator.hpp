@@ -361,7 +361,7 @@ private:
     size_t tolerance_table_size_;                                           ///< Active entries in tolerance table
 
     // Performance optimization data
-    mutable std::array<uint32_t, 6> standard_frequencies_;                  ///< Sorted standard frequencies for binary search
+    mutable std::array<uint32_t, 10> standard_frequencies_;                 ///< Sorted standard frequencies for binary search
     mutable uint32_t current_tolerance_ppm_;                                 ///< Current tolerance for static function access
 };
 

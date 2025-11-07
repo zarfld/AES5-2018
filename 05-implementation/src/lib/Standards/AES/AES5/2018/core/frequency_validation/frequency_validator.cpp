@@ -26,21 +26,29 @@ namespace core {
 namespace frequency_validation {
 
 // Static frequency table for efficient lookup
-static constexpr std::array<uint32_t, 6> STANDARD_FREQUENCIES = {
-    32000,  // Legacy (AES5-2018 Section 5.4)
-    44100,  // Consumer (AES5-2018 Section 5.2)  
-    47952,  // Pull-down 48k (AES5-2018 Annex A)
-    48000,  // Primary (AES5-2018 Section 5.1)
-    48048,  // Pull-up 48k (AES5-2018 Annex A)
-    96000   // High bandwidth (AES5-2018 Section 5.2)
+static constexpr std::array<uint32_t, 10> STANDARD_FREQUENCIES = {
+    32000,   // Legacy (AES5-2018 Section 5.4)
+    44100,   // Consumer (AES5-2018 Section 5.2)  
+    47952,   // Pull-down 48k (AES5-2018 Annex A)
+    48000,   // Primary (AES5-2018 Section 5.1)
+    48048,   // Pull-up 48k (AES5-2018 Annex A)
+    88200,   // Double rate 44.1k (AES5-2018 Section 5.2)
+    96000,   // High bandwidth (AES5-2018 Section 5.2)
+    176400,  // Quadruple rate 44.1k (AES5-2018 Section 5.2)
+    192000,  // Quadruple rate 48k (AES5-2018 Section 5.2)
+    384000   // Octuple rate 48k (AES5-2018 Section 5.2)
 };
 
 // Mapping frequencies to AES5 clauses
 static compliance::AES5Clause get_aes5_clause_for_frequency(uint32_t frequency) noexcept {
     switch (frequency) {
         case 48000: return compliance::AES5Clause::Section_5_1;   // Primary
-        case 44100: 
-        case 96000: return compliance::AES5Clause::Section_5_2;   // Other
+        case 44100:
+        case 88200:
+        case 96000:
+        case 176400:
+        case 192000:
+        case 384000: return compliance::AES5Clause::Section_5_2;   // Other/multiples
         case 32000: return compliance::AES5Clause::Section_5_4;   // Legacy  
         case 47952:
         case 48048: return compliance::AES5Clause::Annex_A;       // Pull-up/down
