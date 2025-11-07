@@ -61,19 +61,19 @@ protected:
 TEST_F(AES5ArchitectureTest, HardwareInterfaceAbstraction) {
     // Core validation works without hardware interfaces
     auto result = validator->validate_frequency(48000);
-    EXPECT_TRUE(result.is_valid()());
+    EXPECT_TRUE(result.is_valid());
     
     // No direct hardware access required for validation
     result = validator->validate_frequency(44100);
-    EXPECT_TRUE(result.is_valid()());
+    EXPECT_TRUE(result.is_valid());
     
     // Interface abstraction allows testing without hardware
     result = validator->validate_frequency(96000);
-    EXPECT_TRUE(result.is_valid()());
+    EXPECT_TRUE(result.is_valid());
     
     // Invalid frequency detection works without hardware
     result = validator->validate_frequency(12345);
-    EXPECT_FALSE(result.is_valid()());
+    EXPECT_FALSE(result.is_valid());
 }
 
 /**
@@ -102,7 +102,7 @@ TEST_F(AES5ArchitectureTest, RuntimeInterfaceInjection) {
     
     // Validation works with mocked interface
     auto result = validator->validate_frequency(mock.sample_rate);
-    EXPECT_TRUE(result.is_valid()());
+    EXPECT_TRUE(result.is_valid());
 }
 
 /**
@@ -169,9 +169,9 @@ TEST_F(AES5ArchitectureTest, InterfaceSegregationPrinciple) {
     };
     
     // Interfaces are separate and focused
-    EXPECT_FALSE(std::is_same_v<AudioInterface, TimerInterface>);
-    EXPECT_FALSE(std::is_same_v<TimerInterface, MemoryInterface>);
-    EXPECT_FALSE(std::is_same_v<AudioInterface, MemoryInterface>);
+    EXPECT_FALSE((std::is_same_v<AudioInterface, TimerInterface>));
+    EXPECT_FALSE((std::is_same_v<TimerInterface, MemoryInterface>));
+    EXPECT_FALSE((std::is_same_v<AudioInterface, MemoryInterface>));
 }
 
 // ============================================================================
